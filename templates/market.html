@@ -95,6 +95,7 @@
             <th>Name</th>
             <th>Barcode</th>
             <th>Price ($)</th>
+            <th>option </th>
         </tr>
     </thead>
     <tbody>
@@ -104,6 +105,9 @@
             <td>{{ item.name }}</td>
             <td>{{ item.barcode }}</td>
             <td>{{ item.price }}$</td>
+            <td>
+              <button class="btn btn-outline btn-info">more Info</button>
+              <button class="btn btn-outline btn-success">purchase this Item</button>
         </tr>
         {% endfor %}
     </tbody>
