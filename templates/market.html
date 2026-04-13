@@ -1,103 +1,24 @@
-<!doctype html>
-<html lang="en">
-<head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Fab System</title>
+{% extends "base.html" %}
 
-  <!-- Bootstrap CSS -->
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+{% block title %}
+Market Page
+{% endblock %}
 
-  <style>
-    body {
-      background-color: #212121;
-      color: white;
-    }
+{% block content %}
 
-    .custom-link {
-      color: #ffc107 !important;
-      font-weight: bold;
-    }
+<h1>Market Page</h1>
 
-    .custom-link:hover {
-      color: orange !important;
-    }
-
-    .main-title {
-      margin-top: 80px;
-      text-align: center;
-      font-size: 2.5rem;
-    }
-
-    .home-section {
-      margin-top: 40px;
-      text-align: center;
-      font-size: 1.5rem;
-      color: #ccc;
-    }
-  </style>
-</head>
-
-<body>
-
-  <!-- NAVBAR -->
-  <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
-    <div class="container-fluid">
-
-      <a class="navbar-brand" href="#">fab solutions</a>
-
-      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
-        <span class="navbar-toggler-icon"></span>
-      </button>
-
-      <div class="collapse navbar-collapse" id="navbarNav">
-
-        <!-- LEFT SIDE -->
-        <ul class="navbar-nav">
-          <li class="nav-item">
-            <a class="nav-link custom-link active" href="#">Home</a>
-          </li>
-          <li class="nav-item">
-            <a class="nav-link custom-link" href="#">Market</a>
-          </li>
-        </ul>
-
-        <!-- RIGHT SIDE -->
-        <ul class="navbar-nav ms-auto">
-          <li class="nav-item">
-            <a class="nav-link custom-link" href="#">Register</a>
-          </li>
-          <li class="nav-item">
-            <a class="nav-link custom-link" href="#">Login</a>
-          </li>
-        </ul>
-
-      </div>
-    </div>
-  </nav>
-
-  <!-- MAIN TITLE -->
-  <h1 class="main-title">Welcome to Fab System</h1>
-
-  <!-- HOME SECTION -->
-  <div class="home-section">
-    <p> Made for reason.</p>
-  </div>
-
-  <!-- Bootstrap JS -->
-  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
-
-  <h1>market page</h1>
-  <table class="table table-striped table-bordered table-hover">
+<table class="table table-striped table-bordered table-hover">
     <thead class="table-dark">
         <tr>
             <th>ID</th>
             <th>Name</th>
             <th>Barcode</th>
             <th>Price ($)</th>
-            <th>option </th>
+            <th>Option</th>
         </tr>
     </thead>
+
     <tbody>
         {% for item in items %}
         <tr>
@@ -106,14 +27,13 @@
             <td>{{ item.barcode }}</td>
             <td>{{ item.price }}$</td>
             <td>
-<button class="btn btn-outline-info" >More Info</button>
-<button class="btn btn-outline-success">Purchase Item</button>
+                <button class="btn btn-outline-info">More Info</button>
+                <button class="btn btn-outline-success">Purchase Item</button>
+            </td>
+        </tr>
         {% endfor %}
     </tbody>
 </table>
 
-
-</body>
-</html>
-
+{% endblock %}
  
