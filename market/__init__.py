@@ -7,6 +7,5 @@ app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
 db = SQLAlchemy(app)
 
-# 🔥 THIS LINE IS CRITICAL
 from market import models
 from market import routes
