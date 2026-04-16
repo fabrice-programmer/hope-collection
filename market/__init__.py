@@ -7,6 +7,6 @@ app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
 db = SQLAlchemy(app)
 
-# 🔥 IMPORTANT: import models BEFORE routes
+# 🔥 THIS LINE IS CRITICAL
 from market import models
 from market import routes

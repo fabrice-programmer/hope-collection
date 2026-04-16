@@ -8,6 +8,6 @@ class Item(db.Model):
     description = db.Column(db.String(length=1024), nullable=False, unique=True)
 
     def __repr__(self):
-        return f"Item({self.name})"
+        return f"Item{self.name}"
 
     
