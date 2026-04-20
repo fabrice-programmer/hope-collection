@@ -1,60 +1,24 @@
 <!doctype html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <title>Fab System</title>
-
-  <!-- Bootstrap CSS -->
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <title>{% block title %}{% endblock %}</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
 </head>
 <body>
 
- <!-- NAVBAR -->
-  <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+<nav class="navbar navbar-dark bg-dark">
     <div class="container-fluid">
-
-      <a class="navbar-brand" href="#">fab solutions</a>
-
-      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
-        <span class="navbar-toggler-icon"></span>
-      </button>
-
-      <div class="collapse navbar-collapse" id="navbarNav">
-
-        <!-- LEFT SIDE -->
-        <ul class="navbar-nav">
-          <li class="nav-item">
-            <a class="nav-link custom-link active" href="{{url_for("home_page")}}">Home</a>
-          </li>
-          <li class="nav-item">
-            <a class="nav-link custom-link" href="{{url_for("market_page")}}">Market</a>
-          </li>
-        </ul>
-
-        <!-- RIGHT SIDE -->
-        <ul class="navbar-nav ms-auto">
-          <li class="nav-item">
-            <a class="nav-link custom-link" href="#">Register</a>
-          </li>
-          <li class="nav-item">
-            <a class="nav-link custom-link" href="#">Login</a>
-          </li>
-        </ul>
-
-      </div>
+        <a class="navbar-brand" href="/">My Flask App</a>
     </div>
-  </nav>
-   <!-- MAIN TITLE -->
-<h1 class="main-title text-center mt-5">Welcome to Fab System</h1>
+</nav>
 
-<!-- HOME SECTION -->
-<div class="home-section text-center mt-3">
-  <p class="lead">Made for reason.</p>
+<div class="container mt-4">
+    {% block content %}
+    {% endblock %}
 </div>
-  {% block content %}
 
-  {%endblock%}
-
+</body>
+</html>
  
 
 
