@@ -3,5 +3,8 @@
  register page         
 {%endblock%}
 {%block content %}
-{{form}}
+   <form method="post" class="form_register" style="color:white">
+    {{form.username.label()}}
+    {{form.username(class="form_control",placeholder="username")}}
+   </form>   
 {% endblock %}
