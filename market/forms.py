@@ -4,9 +4,9 @@ from wtforms import PasswordField,SubmitField
 
 
 class RegisterForm(FlaskForm):
-    username=StringField(label='username')
-    email_address=StringField(label='email')
-    password1 = PasswordField(label='password1')
-    password2 = PasswordField(label="password2")
+    username=StringField(label='user Name:')
+    email_address=StringField(label='email Address:')
+    password1 = PasswordField(label='password:')
+    password2 = PasswordField(label="Confirm Password:")
     submit=SubmitField(label="submit")
   

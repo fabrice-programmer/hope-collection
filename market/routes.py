@@ -22,4 +22,5 @@ def login_page():
 
 @app.route('/register')
 def register_page():
-    return "Register Page"
+    form=RegisterForm()
+    return render_template('register.html',form=form)
