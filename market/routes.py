@@ -1,8 +1,9 @@
 from market import app
 from flask import render_template
-from market.models import Item, User
+from market.models import Item,user
 from market.forms import RegisterForm
-
+from market import app, db
+from flask import render_template, redirect, url_for
 
 @app.route('/')
 def home_page():
