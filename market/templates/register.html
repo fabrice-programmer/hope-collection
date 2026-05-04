@@ -4,24 +4,30 @@
 {% endblock %}
 
 {% block content %}
+<body class="text-center"> 
 <div class="container"> 
-    <form method="post" class="form_register" style="color:white">
+    <form method="post" class="form_register" style="color:black">
 
-        <div>
-            {{ form.username.label() }}
-            {{ form.username(class="form-control", placeholder="username") }}
-        </div>
+        <h1>Please create your account here</h1>
+        <br>
 
-        <div>
-            {{ form.email.label() }}
-            {{ form.email(class="form-control", placeholder="Email Address") }}
-        </div>
+        {{ form.username.label() }}
+        {{ form.username(class="form-control", placeholder="username") }}
+    
+        {{ form.email.label() }}
+        {{ form.email(class="form-control", placeholder="Email Address") }}
+    
+        {{ form.password1.label() }}
+        {{ form.password1(class="form-control", placeholder="password") }}
 
-        <div>
-            {{ form.password1.label() }}
-            {{ form.password1(class="form-control", placeholder="password") }}
-        </div>
+        
+        {{ form.password2.label() }}
+        {{ form.password2(class="form-control", placeholder="confirm password") }}
+
+        <br>
+        {{form.submit(class="btn btn-lg btn-block btn-primary")}}
 
     </form>   
 </div>
+</body>
 {% endblock %}
