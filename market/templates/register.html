@@ -1,12 +1,27 @@
 {% extends 'base.html'%}
-{%block title%}
+{% block title %}
  register here       
-{%endblock%}
-{%block content %}
-<div class="container">  <form method="post" class="form_register" style="color:white">
-    {{form.username.label()}}
-    {{form.username(class="form_control",placeholder="username")}}
+{% endblock %}
+
+{% block content %}
+<div class="container"> 
+    <form method="post" class="form_register" style="color:white">
+
+        <div>
+            {{ form.username.label() }}
+            {{ form.username(class="form-control", placeholder="username") }}
+        </div>
+
+        <div>
+            {{ form.email.label() }}
+            {{ form.email(class="form-control", placeholder="Email Address") }}
+        </div>
+
+        <div>
+            {{ form.password1.label() }}
+            {{ form.password1(class="form-control", placeholder="password") }}
+        </div>
+
+    </form>   
 </div>
- 
-   </form>   
 {% endblock %}
