@@ -8,7 +8,7 @@ class RegisterForm(FlaskForm):
         validators=[DataRequired(), Length(min=2, max=30)]
     )
 
-    email = StringField(   
+    email_address = StringField(
         label='Email Address:',
         validators=[DataRequired(), Email()]
     )

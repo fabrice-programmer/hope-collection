@@ -1,6 +1,6 @@
 from market import app
 from flask import render_template
-from market.models import Item,User
+from market.models import Item, User
 from market.forms import RegisterForm
 from market import app, db
 from flask import render_template, redirect, url_for
@@ -25,7 +25,7 @@ def login_page():
 def register_page():
     form=RegisterForm()
     if form.validate_on_submit():
-        user_to_create=user(username=form.username.data,
+        user_to_create=User(username=form.username.data,
                             email_address=form.email_address.data,
                             password_hash=form.password1.data)
         db.session.add(user_to_create)
