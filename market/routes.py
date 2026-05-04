@@ -20,7 +20,14 @@ def login_page():
     return "Login Page"
 
 
-@app.route('/register')
+@app.route('/register',methods=['GET','POST'])
 def register_page():
     form=RegisterForm()
+    if form.validate_on_submit():
+        user_to_create=user(username=form.username.data,
+                            email_address=form.email_address.data,
+                            password_hash=form.password1.data)
+        db.session.add(user_to_create)
+        db.session.commit()
+        return redirect(url_for("market_page"))
     return render_template('register.html',form=form)
