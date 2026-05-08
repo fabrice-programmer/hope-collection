@@ -5,6 +5,13 @@ from market.forms import RegisterForm
 from market import app, db
 from flask import render_template, redirect, url_for,flash
 
+from market.models import User
+
+@app.route('/users')
+def users_page():
+    users = User.query.all()
+    return render_template('users.html', users=users)
+
 @app.route('/')
 def home_page():
     return render_template("home.html")
