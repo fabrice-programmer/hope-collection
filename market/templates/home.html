@@ -1,6 +1,26 @@
 {% extends 'base.html' %}
 
 {% block content %}
-    <h1>Welcome to Gamma</h1>
+    <div class="row">
+        <div class="col-md-8 mx-auto text-center">
+            <h1 class="display-4 mb-4">Welcome to MyApp</h1>
+            {% if current_user.is_authenticated %}
+                <p class="lead mb-4">Hello {{ current_user.username }}! Welcome back to your marketplace.</p>
+                <a href="{{ url_for('market_page') }}" class="btn btn-primary btn-lg">
+                    Go to Market
+                </a>
+            {% else %}
+                <p class="lead mb-4">A modern marketplace application with user authentication.</p>
+                <div class="mt-4">
+                    <a href="{{ url_for('login_page') }}" class="btn btn-primary btn-lg me-2">
+                        Login
+                    </a>
+                    <a href="{{ url_for('register_page') }}" class="btn btn-secondary btn-lg">
+                        Register
+                    </a>
+                </div>
+            {% endif %}
+        </div>
+    </div>
 {% endblock %}
  

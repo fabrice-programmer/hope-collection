@@ -7,8 +7,14 @@ app = Flask(__name__)
 
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///database.db'
 app.config['SECRET_KEY'] = '6bbfe0ca18dacabb4c4f3b66'
+app.config['SESSION_PERMANENT'] = False
+app.config['SESSION_TYPE'] = 'filesystem'
 
 db = SQLAlchemy(app)
 bcrypt = Bcrypt(app)              
-login_manager=LoginManager(app)
+login_manager = LoginManager(app)
+login_manager.login_view = 'login_page'
+login_manager.login_message = 'Please log in first to access this page.'
+login_manager.login_message_category = 'info'
+
 from market import routes
