@@ -1,0 +1,47 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-8">
+        <div class="card shadow-sm">
+            <div class="card-header bg-success text-white">
+                <h3 class="mb-0">Top-up Request Submitted</h3>
+            </div>
+            <div class="card-body">
+                <div class="alert alert-success" role="alert">
+                    <h4 class="alert-heading">Request Submitted Successfully!</h4>
+                    <p>Your top-up request has been submitted. The website owner will review and approve it after confirming receipt of payment.</p>
+                    <hr>
+                    <p class="mb-0">You will receive a notification once your wallet is updated.</p>
+                </div>
+
+                <div class="row">
+                    <div class="col-md-6">
+                        <h5>Request Details</h5>
+                        <ul class="list-group list-group-flush">
+                            <li class="list-group-item"><strong>Amount:</strong> RWF {{ request.amount }}</li>
+                            <li class="list-group-item"><strong>Payment Method:</strong> {{ 'MTN Mobile Money' if request.method == 'mtn' else 'Equity Bank Transfer' }}</li>
+                            <li class="list-group-item"><strong>Status:</strong> <span class="badge bg-warning text-dark">Pending</span></li>
+                            <li class="list-group-item"><strong>Submitted At:</strong> {{ request.created_at.strftime('%Y-%m-%d %H:%M') }}</li>
+                        </ul>
+                    </div>
+                    <div class="col-md-6">
+                        <h5>Payment Instructions</h5>
+                        {% if request.method == 'mtn' %}
+                        <p>Send RWF {{ request.amount }} to MTN Mobile Money number: <strong>0789174857</strong></p>
+                        {% else %}
+                        <p>Transfer RWF {{ request.amount }} to Equity Bank account: <strong>4002100815300</strong></p>
+                        {% endif %}
+                        <p class="text-muted small">After sending the money, wait for the owner to approve your request. Your wallet will be updated automatically.</p>
+                    </div>
+                </div>
+
+                <div class="mt-4">
+                    <a href="{{ url_for('my_top_ups') }}" class="btn btn-primary">View My Requests</a>
+                    <a href="{{ url_for('view_cart') }}" class="btn btn-outline-secondary">Back to Cart</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

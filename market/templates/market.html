@@ -22,9 +22,9 @@
                     </div>
                     <div class="card-footer bg-white border-top">
                         <div class="d-flex justify-content-between align-items-center">
-                            <h4 class="mb-0"><span class="badge bg-success">${{ item.price }}</span></h4>
+                            <h4 class="mb-0"><span class="badge bg-success">RWF {{ item.price }}</span></h4>
                             <a href="{{ url_for('add_to_cart', item_id=item.id) }}" class="btn btn-primary btn-sm">
-                                🛒 Add to Cart
+                                 Add to Cart
                             </a>
                         </div>
                     </div>
@@ -44,7 +44,7 @@
     <div class="col-md-3">
         <div class="card sticky-top" style="top: 20px;">
             <div class="card-header bg-primary text-white">
-                <h5 class="mb-0">🛒 Cart Summary</h5>
+                <h5 class="mb-0">Cart Summary</h5>
             </div>
             <div class="card-body">
                 {% set cart = session.get('cart', []) %}
@@ -56,8 +56,8 @@
                         {% for item in cart %}
                         <div class="mb-2 p-2 border-bottom">
                             <p class="mb-1"><strong>{{ item.name }}</strong></p>
-                            <p class="mb-1">Qty: <strong>{{ item.quantity }}</strong> × ${{ item.price }}</p>
-                            <p class="mb-0 text-success"><strong>${{ item.price * item.quantity }}</strong></p>
+                            <p class="mb-1">Qty: <strong>{{ item.quantity }}</strong> × RWF {{ item.price }}</p>
+                            <p class="mb-0 text-success"><strong>RWF {{ item.price * item.quantity }}</strong></p>
                         </div>
                         {% endfor %}
                     </div>
@@ -68,10 +68,10 @@
                     {% endfor %}
                     <div class="d-flex justify-content-between mb-3">
                         <h6>Total:</h6>
-                        <h5 class="text-success"><strong>${{ total_price }}</strong></h5>
+                        <h5 class="text-success"><strong>RWF {{ total_price }}</strong></h5>
                     </div>
                     <a href="{{ url_for('view_cart') }}" class="btn btn-primary w-100 mb-2">View Cart</a>
-                    <a href="{{ url_for('checkout') }}" class="btn btn-success w-100">Checkout</a>
+                    <a href="{{ url_for('view_cart') }}" class="btn btn-success w-100">Proceed to Payment</a>
                 {% else %}
                     <p class="text-muted text-center mb-0">Your cart is empty</p>
                     <p class="text-muted text-center small">Add items to get started!</p>
@@ -82,14 +82,21 @@
         <!-- Budget Info -->
         <div class="card mt-3">
             <div class="card-header bg-info text-white">
-                <h6 class="mb-0">💰 Your Budget</h6>
+                <h6 class="mb-0"> Your Budget</h6>
             </div>
             <div class="card-body">
-                <h4 class="text-info">${{ current_user.budget }}</h4>
+                <h4 class="text-info">RWF {{ current_user.budget }}</h4>
                 <p class="mb-0 small text-muted">Remaining balance</p>
             </div>
         </div>
-    </div>
+        <div class="card mt-3">
+            <div class="card-body text-center">
+                <p class="mb-3 small text-muted">Need more funds for checkout?</p>
+                <a href="{{ url_for('top_up') }}" class="btn btn-warning w-100">
+                    ⚡ Top Up Wallet
+                </a>
+            </div>
+        </div>    </div>
 </div>
 
 <style>

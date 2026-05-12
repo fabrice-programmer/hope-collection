@@ -26,7 +26,7 @@
 
     <div class="container-fluid">
 
-        <a class="navbar-brand" href="{{ url_for('home_page') }}">MyApp</a>
+        <a class="navbar-brand" href="{{ url_for('home_page') }}">FAB</a>
 
         <button class="navbar-toggler" type="button" 
                 data-bs-toggle="collapse" 
@@ -44,6 +44,14 @@
                 <li class="nav-item">
                     <a class="nav-link" href="{{ url_for('market_page') }}">Market</a>
                 </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="{{ url_for('top_up') }}">Top Up</a>
+                </li>
+                {% if current_user.id == 1 %}
+                <li class="nav-item">
+                    <a class="nav-link" href="{{ url_for('top_up_requests') }}">Approve Top-ups</a>
+                </li>
+                {% endif %}
                 {% endif %}
             </ul>
 

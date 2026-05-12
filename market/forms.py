@@ -1,6 +1,6 @@
 from flask_wtf import FlaskForm
-from wtforms import StringField, PasswordField, SubmitField
-from wtforms.validators import DataRequired, Email, Length, EqualTo, ValidationError
+from wtforms import StringField, PasswordField, SubmitField, IntegerField, RadioField
+from wtforms.validators import DataRequired, Email, Length, EqualTo, ValidationError, NumberRange
 from market.models import User
 
 
@@ -53,3 +53,37 @@ class LoginForm(FlaskForm):
     )
 
     submit = SubmitField(label='Sign In')
+
+
+class TopUpForm(FlaskForm):
+    amount = IntegerField(
+        label='Top Up Amount (RWF)',
+        validators=[DataRequired(), NumberRange(min=100, message='Enter an amount of at least 100 RWF')]
+    )
+    payment_method = RadioField(
+        label='Payment Method',
+        choices=[
+            ('mtn', 'MTN Mobile Money'),
+            ('equity', 'Equity Bank Transfer')
+        ],
+        validators=[DataRequired()]
+    )
+    submit = SubmitField(label='Request Top Up')
+
+
+class CheckoutForm(FlaskForm):
+
+    payment_method = RadioField(
+        label='Select Payment Method',
+        choices=[
+            ('wallet', 'Wallet balance'),
+            ('mtn', 'MTN Mobile Money'),
+            ('equity', 'Equity Bank Transfer')
+        ],
+        validators=[DataRequired()]
+    )
+
+    submit = SubmitField(label='Complete Checkout')    
+
+
+

@@ -1,0 +1,68 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-10">
+        <div class="card shadow-sm">
+            <div class="card-header bg-dark text-white">
+                <h3 class="mb-0">Top-up Requests Approval</h3>
+            </div>
+            <div class="card-body">
+                <p class="mb-4">Review incoming top-up requests and approve them after confirming that the payment has been received.</p>
+
+                {% if requests %}
+                <div class="table-responsive">
+                    <table class="table table-bordered table-hover align-middle">
+                        <thead class="table-light">
+                            <tr>
+                                <th>User</th>
+                                <th>Amount</th>
+                                <th>Method</th>
+                                <th>Status</th>
+                                <th>Requested At</th>
+                                <th>Expires At</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for req in requests %}
+                            <tr>
+                                <td>{{ req.user.username }}</td>
+                                <td>RWF {{ req.amount }}</td>
+                                <td>{{ 'MTN Mobile Money' if req.method == 'mtn' else 'Equity Bank Transfer' }}</td>
+                                <td>
+                                    {% if req.status == 'pending' %}
+                                        <span class="badge bg-warning text-dark">Pending</span>
+                                    {% elif req.status == 'approved' %}
+                                        <span class="badge bg-success">Approved</span>
+                                    {% elif req.status == 'expired' %}
+                                        <span class="badge bg-secondary">Expired</span>
+                                    {% else %}
+                                        <span class="badge bg-danger">Declined</span>
+                                    {% endif %}
+                                </td>
+                                <td>{{ req.created_at.strftime('%Y-%m-%d %H:%M') }}</td>
+                                <td>{{ req.expires_at.strftime('%Y-%m-%d %H:%M') }}</td>
+                                <td>
+                                    {% if req.status == 'pending' %}
+                                    <a href="{{ url_for('manage_top_up_request', request_id=req.id, action='approve') }}" class="btn btn-sm btn-success me-1">Approve</a>
+                                    <a href="{{ url_for('manage_top_up_request', request_id=req.id, action='decline') }}" class="btn btn-sm btn-danger">Decline</a>
+                                    {% else %}
+                                    <span class="text-muted">No actions</span>
+                                    {% endif %}
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                {% else %}
+                <div class="alert alert-info" role="alert">
+                    There are no top-up requests at the moment.
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

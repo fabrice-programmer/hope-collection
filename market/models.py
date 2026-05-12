@@ -1,3 +1,4 @@
+from datetime import datetime, timedelta
 from market import db, bcrypt,login_manager
 from flask_login import UserMixin
 
@@ -13,6 +14,7 @@ class User(db.Model,UserMixin):
     password_hash = db.Column(db.String(60), nullable=False)
     budget = db.Column(db.Integer, nullable=False, default=1000)
     items = db.relationship('Item', backref='owned_user', lazy=True)
+    top_up_requests = db.relationship('TopUpRequest', backref='user', lazy=True)
 
     @property
     def password(self):
@@ -40,4 +42,17 @@ class Item(db.Model):
 
     def __repr__(self):
         return f"Item('{self.name}')"
-    
+
+class TopUpRequest(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+    amount = db.Column(db.Integer, nullable=False)
+    method = db.Column(db.String(20), nullable=False)
+    status = db.Column(db.String(20), nullable=False, default='pending')
+    created_at = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
+    expires_at = db.Column(db.DateTime, nullable=False, default=lambda: datetime.utcnow() + timedelta(hours=24))
+    reviewed_at = db.Column(db.DateTime)
+    reviewer_id = db.Column(db.Integer)
+
+    def __repr__(self):
+        return f"TopUpRequest(user_id={self.user_id}, amount={self.amount}, status={self.status})"    

@@ -22,7 +22,7 @@
                     {% for item in cart %}
                     <tr>
                         <td><strong>{{ item.name }}</strong></td>
-                        <td>${{ item.price }}</td>
+                        <td>RWF {{ item.price }}</td>
                         <td>
                             <div class="input-group input-group-sm" style="width: 100px;">
                                 <a href="{{ url_for('update_cart', item_id=item.id, quantity=item.quantity-1) }}" 
@@ -32,7 +32,7 @@
                                    class="btn btn-outline-secondary">+</a>
                             </div>
                         </td>
-                        <td><strong>${{ item.price * item.quantity }}</strong></td>
+                        <td><strong>RWF {{ item.price * item.quantity }}</strong></td>
                         <td>
                             <a href="{{ url_for('remove_from_cart', item_id=item.id) }}" 
                                class="btn btn-danger btn-sm">
@@ -80,32 +80,51 @@
                         </div>
                         <div class="d-flex justify-content-between mb-2">
                             <span>Subtotal:</span>
-                            <strong>${{ total_price }}</strong>
+                            <strong>RWF {{ total_price }}</strong>
                         </div>
                     </div>
                     <hr>
                     <div class="d-flex justify-content-between mb-3">
                         <h5>Total Price:</h5>
-                        <h4 class="text-success"><strong>${{ total_price }}</strong></h4>
+                        <h4 class="text-success"><strong>RWF {{ total_price }}</strong></h4>
                     </div>
 
-                    <!-- Budget Check -->
-                    {% if current_user.budget >= total_price %}
-                    <div class="alert alert-success alert-sm mb-3" role="alert">
-                        ✓ You have enough budget
+                    <div class="card mb-3">
+                        <div class="card-header bg-light">
+                            <h6 class="mb-0">Payment Method</h6>
+                        </div>
+                        <div class="card-body">
+                            <form method="POST" action="{{ url_for('checkout') }}">
+                                {{ form.hidden_tag() }}
+                                {% for subfield in form.payment_method %}
+                                <div class="form-check mb-2">
+                                    {{ subfield(class_='form-check-input') }}
+                                    <label class="form-check-label">
+                                        {{ subfield.label.text }}
+                                    </label>
+                                </div>
+                                {% endfor %}
+
+                                <div class="alert alert-secondary mt-3" role="alert">
+                                    <strong>MTN Mobile Money:</strong> pay to <strong>0789174857</strong>
+                                    <br>
+                                    <strong>Equity Bank:</strong> account <strong>4002100815300</strong>
+                                </div>
+
+                                <button type="submit" class="btn btn-success w-100 btn-lg">
+                                    💳 Proceed to Payment
+                                </button>
+                            </form>
+                        </div>
                     </div>
-                    <a href="{{ url_for('checkout') }}" class="btn btn-success w-100 btn-lg">
-                        💳 Proceed to Checkout
+
+                    {% if current_user.budget < total_price %}
+                    <div class="alert alert-warning alert-sm" role="alert">
+                        ✗ Insufficient wallet balance: you need RWF {{ total_price - current_user.budget }} more.
+                    </div>
+                    <a href="{{ url_for('top_up') }}" class="btn btn-outline-warning w-100 mb-2">
+                        ⚡ Top Up Wallet
                     </a>
-                    {% else %}
-                    <div class="alert alert-danger alert-sm mb-3" role="alert">
-                        ✗ Insufficient budget!
-                        <br>
-                        <small>Need: ${{ total_price - current_user.budget }} more</small>
-                    </div>
-                    <button class="btn btn-danger w-100" disabled>
-                        Cannot Checkout
-                    </button>
                     {% endif %}
                 {% else %}
                     <p class="text-muted text-center">No items in cart</p>
@@ -119,8 +138,36 @@
                 <h6 class="mb-0">💰 Your Budget</h6>
             </div>
             <div class="card-body">
-                <h3 class="text-info mb-1">${{ current_user.budget }}</h3>
+                <h3 class="text-info mb-1">RWF {{ current_user.budget }}</h3>
                 <p class="mb-0 small text-muted">Available balance</p>
+            </div>
+        </div>
+
+        <!-- Payment Instructions Card -->
+        <div class="card mt-3">
+            <div class="card-header bg-secondary text-white">
+                <h6 class="mb-0">📲 Add Money</h6>
+            </div>
+            <div class="card-body">
+                <p class="mb-2">Use one of the options below to add money to your wallet.</p>
+                <ul class="list-group list-group-flush mb-3">
+                    <li class="list-group-item p-2">
+                        <strong>MTN Mobile Money:</strong>
+                        <br>
+                        Pay to <strong>0789174857</strong>
+                    </li>
+                    <li class="list-group-item p-2">
+                        <strong>Equity Bank:</strong>
+                        <br>
+                        Account: <strong>4002100815300</strong>
+                    </li>
+                </ul>
+                <a href="{{ url_for('top_up') }}" class="btn btn-outline-primary w-100 mb-2">
+                    Go to Top Up Page
+                </a>
+                <a href="{{ url_for('my_top_ups') }}" class="btn btn-outline-secondary w-100">
+                    View My Top Up Requests
+                </a>
             </div>
         </div>
     </div>
