@@ -1,0 +1,245 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row">
+        <div class="col-12">
+            <h1 class="mb-4">Owner Dashboard</h1>
+        </div>
+    </div>
+
+    <!-- Statistics Cards -->
+    <div class="row mb-4">
+        <div class="col-md-4">
+            <div class="card text-white bg-primary mb-3">
+                <div class="card-header">Total Users</div>
+                <div class="card-body">
+                    <h5 class="card-title">{{ users|length }}</h5>
+                    <p class="card-text">Registered users on the platform</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card text-white bg-success mb-3">
+                <div class="card-header">Total Products</div>
+                <div class="card-body">
+                    <h5 class="card-title">{{ items|length }}</h5>
+                    <p class="card-text">Items available in the market</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card text-white bg-warning mb-3">
+                <div class="card-header">Pending Orders</div>
+                <div class="card-body">
+                    <h5 class="card-title">{{ pending_orders }}</h5>
+                    <p class="card-text">Orders awaiting approval</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Management Sections -->
+    <div class="row">
+        <!-- Users Section -->
+        <div class="col-md-6 mb-4">
+            <div class="card shadow-sm">
+                <div class="card-header bg-dark text-white">
+                    <h5 class="mb-0">Users Management</h5>
+                </div>
+                <div class="card-body">
+                    <p class="mb-3">Manage registered users and their accounts.</p>
+                    <div class="table-responsive">
+                        <table class="table table-sm table-hover">
+                            <thead>
+                                <tr>
+                                    <th>Username</th>
+                                    <th>Email</th>
+                                    <th>Budget</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for user in users %}
+                                <tr>
+                                    <td>{{ user.username }}</td>
+                                    <td>{{ user.email_address }}</td>
+                                    <td>RWF {{ user.budget }}</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                    <a href="#" class="btn btn-primary btn-sm">Manage Users</a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Products Section -->
+        <div class="col-md-6 mb-4">
+            <div class="card shadow-sm">
+                <div class="card-header bg-dark text-white">
+                    <h5 class="mb-0">Products Management</h5>
+                </div>
+                <div class="card-body">
+                    <p class="mb-3">Manage products available in the market.</p>
+                    <div class="table-responsive">
+                        <table class="table table-sm table-hover">
+                            <thead>
+                                <tr>
+                                    <th>Name</th>
+                                    <th>Price</th>
+                                    <th>Owner</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for item in items %}
+                                <tr>
+                                    <td>{{ item.name }}</td>
+                                    <td>RWF {{ item.price }}</td>
+                                    <td>{{ item.owned_user.username if item.owned_user else 'N/A' }}</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                    <a href="#" class="btn btn-success btn-sm">Manage Products</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Top-up Requests Section -->
+    <div class="row">
+        <div class="col-12">
+            <div class="card shadow-sm">
+                <div class="card-header bg-dark text-white d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0">Top-up Requests</h5>
+                    <a href="{{ url_for('top_up_requests') }}" class="btn btn-light btn-sm">View All</a>
+                </div>
+                <div class="card-body">
+                    <p class="mb-3">Recent top-up requests requiring approval.</p>
+                    {% if requests %}
+                    <div class="table-responsive">
+                        <table class="table table-sm table-hover">
+                            <thead>
+                                <tr>
+                                    <th>User</th>
+                                    <th>Amount</th>
+                                    <th>Method</th>
+                                    <th>Status</th>
+                                    <th>Requested At</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for req in requests[:5] %} <!-- Show only first 5 -->
+                                <tr>
+                                    <td>{{ req.user.username }}</td>
+                                    <td>RWF {{ req.amount }}</td>
+                                    <td>{{ 'MTN Mobile Money' if req.method == 'mtn' else 'Equity Bank Transfer' }}</td>
+                                    <td>
+                                        {% if req.status == 'pending' %}
+                                            <span class="badge bg-warning text-dark">Pending</span>
+                                        {% elif req.status == 'approved' %}
+                                            <span class="badge bg-success">Approved</span>
+                                        {% elif req.status == 'expired' %}
+                                            <span class="badge bg-secondary">Expired</span>
+                                        {% else %}
+                                            <span class="badge bg-danger">Declined</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>{{ req.created_at.strftime('%Y-%m-%d %H:%M') }}</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                    {% else %}
+                    <div class="alert alert-info">No top-up requests found.</div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Orders Section -->
+    <div class="row">
+        <div class="col-12">
+            <div class="card shadow-sm">
+                <div class="card-header bg-dark text-white d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0">Customer Orders</h5>
+                    <span class="badge bg-danger">{{ pending_orders }} Pending</span>
+                </div>
+                <div class="card-body">
+                    <p class="mb-3">Manage customer orders and approve payments.</p>
+                    {% if orders %}
+                    <div class="table-responsive">
+                        <table class="table table-sm table-hover">
+                            <thead>
+                                <tr>
+                                    <th>Order ID</th>
+                                    <th>Customer</th>
+                                    <th>Items</th>
+                                    <th>Total</th>
+                                    <th>Payment Method</th>
+                                    <th>Status</th>
+                                    <th>Ordered At</th>
+                                    <th>Action</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for order in orders %}
+                                <tr>
+                                    <td>#{{ order.id }}</td>
+                                    <td>{{ order.user.username }}</td>
+                                    <td>
+                                        {% for item in order.parsed_items %}
+                                        {{ item.name }} (x{{ item.quantity }})
+                                        {% if not loop.last %}, {% endif %}
+                                        {% endfor %}
+                                    </td>
+                                    <td>RWF {{ order.total_price }}</td>
+                                    <td>
+                                        {% if order.payment_method == 'mtn' %}
+                                            MTN Mobile Money
+                                        {% elif order.payment_method == 'equity' %}
+                                            Equity Bank Transfer
+                                        {% else %}
+                                            Wallet
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        {% if order.status == 'pending' %}
+                                            <span class="badge bg-warning text-dark">Pending Approval</span>
+                                        {% elif order.status == 'approved' %}
+                                            <span class="badge bg-success">Approved</span>
+                                        {% elif order.status == 'completed' %}
+                                            <span class="badge bg-primary">Completed</span>
+                                        {% else %}
+                                            <span class="badge bg-secondary">Cancelled</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>{{ order.created_at.strftime('%Y-%m-%d %H:%M') }}</td>
+                                    <td>
+                                        {% if order.status == 'pending' %}
+                                        <a href="{{ url_for('manage_order', order_id=order.id, action='approve') }}" class="btn btn-sm btn-success me-1">Approve</a>
+                                        <a href="{{ url_for('manage_order', order_id=order.id, action='decline') }}" class="btn btn-sm btn-danger">Decline</a>
+                                        {% elif order.status == 'approved' %}
+                                        <a href="{{ url_for('manage_order', order_id=order.id, action='complete') }}" class="btn btn-sm btn-primary">Mark Complete</a>
+                                        {% else %}
+                                        <span class="text-muted">No actions</span>
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                    {% else %}
+                    <div class="alert alert-info">No orders found.</div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

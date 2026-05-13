@@ -1,11 +1,12 @@
 from datetime import datetime
 from sqlalchemy.sql import func
+import json
 
 from market import app, db
 from flask import render_template, redirect, url_for, flash, session, request
 from flask_login import login_user, logout_user, login_required, current_user
 
-from market.models import Item, User, TopUpRequest
+from market.models import Item, User, TopUpRequest, Order
 from market.forms import RegisterForm, LoginForm, TopUpForm, CheckoutForm
 
 
@@ -176,9 +177,21 @@ def checkout():
     method = form.payment_method.data
     user = current_user
 
+    # Create order record
+    order = Order(
+        user_id=user.id,
+        items=json.dumps(cart),
+        total_price=total_price,
+        payment_method=method,
+        status='pending'
+    )
+    db.session.add(order)
+    db.session.commit()
+
     if method == 'wallet':
         if user.budget >= total_price:
             user.budget -= total_price
+            order.status = 'completed'
             db.session.commit()
             session['cart'] = []
             session.modified = True
@@ -267,8 +280,68 @@ def manage_top_up_request(request_id, action):
     return redirect(url_for('top_up_requests'))
 
 
+@app.route('/manage_order/<int:order_id>/<action>')
+@login_required
+def manage_order(order_id, action):
+    if not is_site_owner():
+        flash('Access denied', category='danger')
+        return redirect(url_for('market_page'))
+
+    order = Order.query.get_or_404(order_id)
+
+    if action == 'approve':
+        order.status = 'approved'
+        order.approved_at = datetime.utcnow()
+        order.approver_id = current_user.id
+        db.session.commit()
+        flash('Order approved successfully', category='success')
+    elif action == 'decline':
+        order.status = 'cancelled'
+        order.approved_at = datetime.utcnow()
+        order.approver_id = current_user.id
+        db.session.commit()
+        flash('Order declined', category='warning')
+    elif action == 'complete':
+        order.status = 'completed'
+        db.session.commit()
+        flash('Order marked as completed', category='success')
+
+    return redirect(url_for('admin_dashboard'))
+
 @app.route('/my-top-ups')
 @login_required
 def my_top_ups():
     requests = TopUpRequest.query.filter_by(user_id=current_user.id).order_by(TopUpRequest.id.desc()).all()
     return render_template('my_top_ups.html', requests=requests)
+
+@app.route('/admin')
+@login_required
+def admin_dashboard():
+
+    if not is_site_owner():
+        flash('Access denied', category='danger')
+        return redirect(url_for('market_page'))
+
+    users = User.query.all()
+    items = Item.query.all()
+    requests = TopUpRequest.query.all()
+    orders = Order.query.order_by(Order.created_at.desc()).all()
+    pending_requests = TopUpRequest.query.filter_by(status='pending').count()
+    pending_orders = Order.query.filter_by(status='pending').count()
+
+    # Parse order items from JSON
+    for order in orders:
+        try:
+            order.parsed_items = json.loads(order.items)
+        except:
+            order.parsed_items = []
+
+    return render_template(
+        'admin.html',
+        users=users,
+        items=items,
+        requests=requests,
+        orders=orders,
+        pending_requests=pending_requests,
+        pending_orders=pending_orders
+    )

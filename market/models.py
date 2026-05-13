@@ -1,6 +1,7 @@
 from datetime import datetime, timedelta
 from market import db, bcrypt,login_manager
 from flask_login import UserMixin
+import json
 
 @login_manager.user_loader
 def load_user(user_id):
@@ -55,4 +56,21 @@ class TopUpRequest(db.Model):
     reviewer_id = db.Column(db.Integer)
 
     def __repr__(self):
-        return f"TopUpRequest(user_id={self.user_id}, amount={self.amount}, status={self.status})"    
+        return f"TopUpRequest(user_id={self.user_id}, amount={self.amount}, status={self.status})"
+
+class Order(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+    items = db.Column(db.Text, nullable=False)  # JSON string of cart items
+    total_price = db.Column(db.Integer, nullable=False)
+    payment_method = db.Column(db.String(20), nullable=False)
+    status = db.Column(db.String(20), nullable=False, default='pending')  # pending, approved, completed, cancelled
+    created_at = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
+    approved_at = db.Column(db.DateTime)
+    approver_id = db.Column(db.Integer, db.ForeignKey('user.id'))
+
+    user = db.relationship('User', foreign_keys=[user_id], backref='orders')
+    approver = db.relationship('User', foreign_keys=[approver_id], backref='approved_orders')
+
+    def __repr__(self):
+        return f"Order(user_id={self.user_id}, total={self.total_price}, status={self.status})"    
