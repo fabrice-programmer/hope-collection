@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Sales Dashboard</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        .scrollbar-thin::-webkit-scrollbar { width: 6px; }
+        .scrollbar-thin::-webkit-scrollbar-thumb { background-color: rgba(148, 163, 184, 0.6); border-radius: 9999px; }
+    </style>
+</head>
+<body class="min-h-screen bg-slate-100 text-slate-900 dark:bg-slate-950 dark:text-slate-100">
+    <div class="flex min-h-screen">
+        <aside class="hidden md:block w-72 bg-white dark:bg-slate-900 border-r border-slate-200 dark:border-slate-800 p-6">
+            <div class="mb-10">
+                <div class="flex items-center gap-3 mb-4">
+                    <div class="h-12 w-12 rounded-2xl bg-indigo-600 flex items-center justify-center text-white font-bold">A</div>
+                    <div>
+                        <p class="text-xs uppercase tracking-[0.3em] text-slate-500 dark:text-slate-400">Admin Area</p>
+                        <h1 class="text-2xl font-semibold">Sales Dashboard</h1>
+                    </div>
+                </div>
+                <p class="text-sm text-slate-500 dark:text-slate-400">Review orders, top-ups, and revenue at a glance.</p>
+            </div>
+            <nav class="space-y-2">
+                <a href="{{ url_for('admin_dashboard') }}" class="block rounded-3xl px-4 py-3 bg-indigo-600 text-white shadow-soft">Dashboard</a>
+                <a href="{{ url_for('top_up_requests') }}" class="block rounded-3xl px-4 py-3 text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800">Top-up Requests</a>
+                <a href="{{ url_for('market_page') }}" class="block rounded-3xl px-4 py-3 text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800">Market</a>
+                <a href="{{ url_for('logout_page') }}" class="block rounded-3xl px-4 py-3 text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800">Logout</a>
+            </nav>
+        </aside>
+
+        <main class="flex-1 p-6 lg:p-10">
+            <div class="flex flex-col gap-6">
+                {% with messages = get_flashed_messages(with_categories=true) %}
+                    {% if messages %}
+                        <div class="space-y-3">
+                            {% for category, message in messages %}
+                                <div class="rounded-3xl border border-slate-200 bg-white px-6 py-4 text-sm shadow-soft dark:border-slate-800 dark:bg-slate-900">
+                                    <strong class="capitalize">{{ category }}:</strong> {{ message }}
+                                </div>
+                            {% endfor %}
+                        </div>
+                    {% endif %}
+                {% endwith %}
+
+                <header class="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
+                    <div>
+                        <p class="text-sm uppercase tracking-[0.3em] text-slate-500 dark:text-slate-400">Owner dashboard</p>
+                        <h2 class="text-3xl font-semibold">Business performance overview</h2>
+                    </div>
+                    <div class="flex flex-col gap-3 sm:flex-row sm:items-center">
+                        <div class="rounded-3xl bg-white dark:bg-slate-900 p-4 shadow-soft border border-slate-200 dark:border-slate-800">
+                            <p class="text-sm text-slate-500 dark:text-slate-400">Pending Orders</p>
+                            <p class="text-2xl font-semibold">{{ pending_orders }}</p>
+                        </div>
+                        <div class="rounded-3xl bg-white dark:bg-slate-900 p-4 shadow-soft border border-slate-200 dark:border-slate-800">
+                            <p class="text-sm text-slate-500 dark:text-slate-400">Pending Top-ups</p>
+                            <p class="text-2xl font-semibold">{{ pending_requests }}</p>
+                        </div>
+                    </div>
+                </header>
+
+                <section class="grid gap-6 xl:grid-cols-4">
+                    <article class="rounded-3xl bg-white dark:bg-slate-900 p-6 shadow-soft border border-slate-200 dark:border-slate-800">
+                        <p class="text-sm uppercase tracking-[0.3em] text-slate-500 dark:text-slate-400">Revenue</p>
+                        <p class="text-3xl font-semibold mt-4">RWF {{ total_revenue }}</p>
+                        <p class="mt-2 text-sm text-emerald-600 dark:text-emerald-400">{{ revenue_change_text }}</p>
+                    </article>
+                    <article class="rounded-3xl bg-white dark:bg-slate-900 p-6 shadow-soft border border-slate-200 dark:border-slate-800">
+                        <p class="text-sm uppercase tracking-[0.3em] text-slate-500 dark:text-slate-400">Orders</p>
+                        <p class="text-3xl font-semibold mt-4">{{ total_orders }}</p>
+                        <p class="mt-2 text-sm text-blue-600 dark:text-blue-400">Order volume change</p>
+                    </article>
+                    <article class="rounded-3xl bg-white dark:bg-slate-900 p-6 shadow-soft border border-slate-200 dark:border-slate-800">
+                        <p class="text-sm uppercase tracking-[0.3em] text-slate-500 dark:text-slate-400">Customers</p>
+                        <p class="text-3xl font-semibold mt-4">{{ total_customers }}</p>
+                        <p class="mt-2 text-sm text-purple-600 dark:text-purple-400">Active buyers</p>
+                    </article>
+                    <article class="rounded-3xl bg-white dark:bg-slate-900 p-6 shadow-soft border border-slate-200 dark:border-slate-800">
+                        <p class="text-sm uppercase tracking-[0.3em] text-slate-500 dark:text-slate-400">Conversion</p>
+                        <p class="text-3xl font-semibold mt-4">{{ conversion_rate }}%</p>
+                        <p class="mt-2 text-sm text-orange-500 dark:text-orange-400">Estimated rate</p>
+                    </article>
+                </section>
+
+                <section class="grid gap-6 xl:grid-cols-2">
+                    <div class="rounded-3xl bg-white dark:bg-slate-900 p-6 shadow-soft border border-slate-200 dark:border-slate-800">
+                        <div class="flex items-center justify-between mb-5">
+                            <div>
+                                <h3 class="text-xl font-semibold">Monthly Sales Trends</h3>
+                                <p class="text-sm text-slate-500 dark:text-slate-400">Revenue over the last 6 months.</p>
+                            </div>
+                            <span class="rounded-full bg-slate-100 px-3 py-1 text-xs font-semibold text-slate-700 dark:bg-slate-800 dark:text-slate-300">Live</span>
+                        </div>
+                        <canvas id="salesChart" height="240"></canvas>
+                    </div>
+                    <div class="rounded-3xl bg-white dark:bg-slate-900 p-6 shadow-soft border border-slate-200 dark:border-slate-800">
+                        <div class="flex items-center justify-between mb-5">
+                            <div>
+                                <h3 class="text-xl font-semibold">Top Products</h3>
+                                <p class="text-sm text-slate-500 dark:text-slate-400">Best selling items by units sold.</p>
+                            </div>
+                        </div>
+                        <canvas id="productsChart" height="240"></canvas>
+                    </div>
+                </section>
+
+                <section class="rounded-3xl bg-white dark:bg-slate-900 p-6 shadow-soft border border-slate-200 dark:border-slate-800 overflow-x-auto scrollbar-thin">
+                    <div class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between mb-6">
+                        <div>
+                            <h3 class="text-xl font-semibold">Recent Orders</h3>
+                            <p class="text-sm text-slate-500 dark:text-slate-400">Latest orders from clients.</p>
+                        </div>
+                        <div class="rounded-3xl bg-slate-100 px-4 py-2 text-sm text-slate-700 dark:bg-slate-800 dark:text-slate-300">Showing {{ recent_orders|length }} recent orders</div>
+                    </div>
+                    <table class="min-w-full text-left text-sm text-slate-700 dark:text-slate-300">
+                        <thead class="border-b border-slate-200 text-slate-500 dark:border-slate-800 dark:text-slate-400">
+                            <tr>
+                                <th class="py-4 px-4">Order</th>
+                                <th class="py-4 px-4">Customer</th>
+                                <th class="py-4 px-4">Amount</th>
+                                <th class="py-4 px-4">Items</th>
+                                <th class="py-4 px-4">Status</th>
+                                <th class="py-4 px-4">Date</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-slate-200 dark:divide-slate-800">
+                            {% for order in recent_orders %}
+                            <tr>
+                                <td class="py-4 px-4 font-medium">#{{ order.id }}</td>
+                                <td class="py-4 px-4">{{ order.user.username }}</td>
+                                <td class="py-4 px-4">RWF {{ order.total_price }}</td>
+                                <td class="py-4 px-4">
+                                    {% for item in order.parsed_items %}
+                                        {{ item.name }} x{{ item.quantity }}{% if not loop.last %}, {% endif %}
+                                    {% endfor %}
+                                </td>
+                                <td class="py-4 px-4">
+                                    <span class="inline-flex rounded-full px-3 py-1 text-xs font-semibold {% if order.status == 'completed' %}bg-emerald-100 text-emerald-700 dark:bg-emerald-900 dark:text-emerald-200{% elif order.status == 'pending' %}bg-amber-100 text-amber-700 dark:bg-amber-900 dark:text-amber-200{% elif order.status == 'approved' %}bg-sky-100 text-sky-700 dark:bg-sky-900 dark:text-sky-200{% else %}bg-rose-100 text-rose-700 dark:bg-rose-900 dark:text-rose-200{% endif %}">{{ order.status|capitalize }}</span>
+                                </td>
+                                <td class="py-4 px-4">{{ order.created_at.strftime('%Y-%m-%d') }}</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </section>
+            </div>
+        </main>
+    </div>
+
+    <script type="application/json" id="dashboardData">
+{{ {
+    'monthlyLabels': monthly_labels,
+    'monthlySales': monthly_sales,
+    'topProductLabels': top_product_labels,
+    'topProductValues': top_product_values
+} | tojson }}
+    </script>
+    <script>
+        const dashData = JSON.parse(document.getElementById('dashboardData').textContent);
+        const monthlyLabels = dashData.monthlyLabels;
+        const monthlySales = dashData.monthlySales;
+        const topProductLabels = dashData.topProductLabels;
+        const topProductValues = dashData.topProductValues;
+
+        const salesCtx = document.getElementById('salesChart').getContext('2d');
+        new Chart(salesCtx, {
+            type: 'line',
+            data: {
+                labels: monthlyLabels,
+                datasets: [{
+                    label: 'Revenue',
+                    data: monthlySales,
+                    borderColor: '#6366f1',
+                    backgroundColor: 'rgba(99, 102, 241, 0.2)',
+                    fill: true,
+                    tension: 0.4,
+                    pointRadius: 4,
+                    pointBackgroundColor: '#6366f1'
+                }]
+            },
+            options: {
+                responsive: true,
+                plugins: { legend: { display: false } },
+                scales: {
+                    x: { grid: { display: false } },
+                    y: { beginAtZero: true, grid: { color: 'rgba(148, 163, 184, 0.2)' } }
+                }
+            }
+        });
+
+        const productsCtx = document.getElementById('productsChart').getContext('2d');
+        new Chart(productsCtx, {
+            type: 'bar',
+            data: {
+                labels: topProductLabels,
+                datasets: [{
+                    label: 'Units sold',
+                    data: topProductValues,
+                    backgroundColor: ['#7c3aed', '#2563eb', '#0ea5e9', '#f97316', '#14b8a6'],
+                    borderRadius: 12,
+                    maxBarThickness: 40
+                }]
+            },
+            options: {
+                responsive: true,
+                plugins: { legend: { display: false } },
+                scales: {
+                    x: { grid: { display: false } },
+                    y: { beginAtZero: true, grid: { color: 'rgba(148, 163, 184, 0.2)' } }
+                }
+            }
+        });
+    </script>
+</body>
+</html>

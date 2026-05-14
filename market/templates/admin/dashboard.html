@@ -1,0 +1,52 @@
+{% extends 'admin/base_admin.html' %}
+
+{% block content %}
+
+<h1>Admin Dashboard</h1>
+
+<div class="row mt-4">
+
+    <div class="col-md-4">
+
+        <div class="card p-3 shadow">
+
+            <h4>Total Orders</h4>
+
+            <h2>{{ total_orders }}</h2>
+
+        </div>
+
+    </div>
+
+</div>
+
+<h3 class="mt-5">Recent Orders</h3>
+
+<table class="table table-bordered mt-3">
+
+    <tr>
+        <th>Customer</th>
+        <th>Product</th>
+        <th>Quantity</th>
+        <th>Status</th>
+    </tr>
+
+    {% for order in orders %}
+
+    <tr>
+
+        <td>{{ order.customer_name }}</td>
+
+        <td>{{ order.product_name }}</td>
+
+        <td>{{ order.quantity }}</td>
+
+        <td>{{ order.status }}</td>
+
+    </tr>
+
+    {% endfor %}
+
+</table>
+
+{% endblock %}

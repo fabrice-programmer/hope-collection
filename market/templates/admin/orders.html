@@ -1,0 +1,46 @@
+{% extends 'admin/base_admin.html' %}
+
+{% block content %}
+
+<h1>Orders Management</h1>
+
+<table class="table table-bordered mt-4">
+
+    <tr>
+        <th>Customer</th>
+        <th>Product</th>
+        <th>Quantity</th>
+        <th>Status</th>
+        <th>Action</th>
+    </tr>
+
+    {% for order in orders %}
+
+    <tr>
+
+        <td>{{ order.customer_name }}</td>
+
+        <td>{{ order.product_name }}</td>
+
+        <td>{{ order.quantity }}</td>
+
+        <td>{{ order.status }}</td>
+
+        <td>
+
+            <a href="/confirm-order/{{ order.id }}"
+               class="btn btn-success btn-sm">
+
+               Confirm
+
+            </a>
+
+        </td>
+
+    </tr>
+
+    {% endfor %}
+
+</table>
+
+{% endblock %}

@@ -73,4 +73,4 @@ class Order(db.Model):
     approver = db.relationship('User', foreign_keys=[approver_id], backref='approved_orders')
 
     def __repr__(self):
-        return f"Order(user_id={self.user_id}, total={self.total_price}, status={self.status})"    
+        return f"Order(user_id={self.user_id}, total={self.total_price}, status={self.status})"
