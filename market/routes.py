@@ -1,5 +1,4 @@
 from datetime import datetime
-from sqlalchemy.sql import func
 import json
 
 from market import app, db
@@ -25,10 +24,7 @@ def home_page():
     return render_template('home.html')
 
 
-@app.route('/users')
-def users_page():
-    users = User.query.all()
-    return render_template('users.html', users=users)
+
 
 
 @app.route('/market')
@@ -253,12 +249,12 @@ def manage_top_up_request(request_id, action):
         user = User.query.get(req.user_id)
         user.budget += req.amount
         req.status = 'approved'
-        req.reviewed_at = func.now()
+        req.reviewed_at = datetime.utcnow()
         req.reviewer_id = current_user.id
         flash('Approved successfully', category='success')
     elif action == 'decline':
         req.status = 'declined'
-        req.reviewed_at = func.now()
+        req.reviewed_at = datetime.utcnow()
         req.reviewer_id = current_user.id
         flash('Declined', category='info')
     else:
@@ -337,6 +333,8 @@ def admin_dashboard():
         top_product_labels=top_product_labels,
         top_product_values=top_product_values
     )
+
+# -------------------------
 # ORDER MANAGEMENT
 # -------------------------
 @app.route('/manage_order/<int:order_id>/<action>')
@@ -375,7 +373,7 @@ def admin_orders():
 
     orders = Order.query.all()
 
-    return render_template('admin_orders.html', orders=orders)
+    return render_template('admin/orders.html', orders=orders)
 
 
 @app.route('/confirm-order/<int:id>')

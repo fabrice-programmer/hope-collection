@@ -1,7 +1,6 @@
 from datetime import datetime, timedelta
-from market import db, bcrypt,login_manager
+from market import db, bcrypt, login_manager
 from flask_login import UserMixin
-import json
 
 @login_manager.user_loader
 def load_user(user_id):
@@ -15,7 +14,7 @@ class User(db.Model,UserMixin):
     password_hash = db.Column(db.String(60), nullable=False)
     budget = db.Column(db.Integer, nullable=False, default=1000)
     items = db.relationship('Item', backref='owned_user', lazy=True)
-    top_up_requests = db.relationship('TopUpRequest', backref='user', lazy=True)
+    top_up_requests = db.relationship('TopUpRequest', backref='user', lazy=True, foreign_keys='TopUpRequest.user_id')
 
     @property
     def password(self):
@@ -53,7 +52,7 @@ class TopUpRequest(db.Model):
     created_at = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
     expires_at = db.Column(db.DateTime, nullable=False, default=lambda: datetime.utcnow() + timedelta(hours=24))
     reviewed_at = db.Column(db.DateTime)
-    reviewer_id = db.Column(db.Integer)
+    reviewer_id = db.Column(db.Integer, db.ForeignKey('user.id'))
 
     def __repr__(self):
         return f"TopUpRequest(user_id={self.user_id}, amount={self.amount}, status={self.status})"
