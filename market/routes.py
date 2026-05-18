@@ -24,9 +24,6 @@ def home_page():
     return render_template('home.html')
 
 
-
-
-
 @app.route('/market')
 @login_required
 def market_page():
@@ -141,6 +138,36 @@ def clear_cart():
     session['cart'] = []
     session.modified = True
     flash('Cart cleared', category='info')
+    return redirect(url_for('view_cart'))
+
+
+# -------------------------
+# UPDATE CART QUANTITY
+# -------------------------
+@app.route('/update-cart/<int:item_id>/<int:quantity>')
+@login_required
+def update_cart(item_id, quantity):
+
+    if 'cart' not in session:
+        flash('Cart is empty', category='warning')
+        return redirect(url_for('view_cart'))
+
+    for cart_item in session['cart']:
+        if cart_item['id'] == item_id:
+            # prevent invalid quantities
+            if quantity <= 0:
+                session['cart'] = [
+                    item for item in session['cart']
+                    if item['id'] != item_id
+                ]
+                flash('Item removed from cart', category='info')
+            else:
+                cart_item['quantity'] = quantity
+                flash('Cart updated successfully', category='success')
+
+            session.modified = True
+            break
+
     return redirect(url_for('view_cart'))
 
 
@@ -333,6 +360,7 @@ def admin_dashboard():
         top_product_labels=top_product_labels,
         top_product_values=top_product_values
     )
+
 
 # -------------------------
 # ORDER MANAGEMENT
