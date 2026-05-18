@@ -1,57 +1,119 @@
- in tr<!DOCTYPE html>
-<html>
+<!DOCTYPE html>
+<html lang="en">
 <head>
+    <meta charset="UTF-8">
     <title>Transaction History</title>
 
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+
+    <style>
+        body {
+            background: #f5f6fa;
+        }
+
+        .card {
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+        }
+
+        .table thead {
+            background: #0d6efd;
+            color: white;
+        }
+
+        .badge {
+            font-size: 0.85rem;
+            padding: 6px 10px;
+        }
+    </style>
 </head>
+
 <body>
 
 <div class="container mt-5">
 
-    <h2 class="mb-4">Transaction History</h2>
+    <div class="card p-4">
 
-    <table class="table table-bordered table-striped">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+            <h3 class="mb-0">Transaction History</h3>
 
-        <thead>
-            <tr>
-                <th>ID</th>
-                <th>Type</th>
-                <th>Amount</th>
-                <th>Status</th>
-                <th>Date</th>
-            </tr>
-        </thead>
+            <a href="{{ url_for('create_transaction') }}" class="btn btn-primary">
+                + Create Transaction
+            </a>
+        </div>
 
-        <tbody>
+        <table class="table table-hover table-bordered align-middle">
 
-            {% for transaction %}
-            <tr>
-                <td>{{ transaction.id }}</td>
-                <td>{{ transaction.transaction_type }}</td>
-                <td>{{ transaction.amount }}</td>
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Type</th>
+                    <th>Amount</th>
+                    <th>Status</th>
+                    <th>Date</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
 
-                <td>
-                    {% if transaction.status == 'pending' %}
-                        <span class="badge bg-warning text-dark">
-                            Pending
-                        </span>
-                    {% elif transaction.status == 'received' %}
-                        <span class="badge bg-success">
-                            Received
-                        </span>
-                    {% endif %}
-                </td>
+            <tbody>
 
-                <td>
-                    {{ transaction.created_at.strftime('%Y-%m-%d %H:%M') }}
-                </td>
-            </tr>
-            {% endfor %}
+                {% if transactions %}
+                    {% for transaction in transactions %}
+                    <tr>
+                        <td>{{ transaction.id }}</td>
 
-        </tbody>
+                        <td>
+                            <span class="text-capitalize">
+                                {{ transaction.transaction_type }}
+                            </span>
+                        </td>
 
-    </table>
+                        <td>
+                            <strong>{{ transaction.amount }} RWF</strong>
+                        </td>
+
+                        <td>
+                            {% if transaction.status == 'pending' %}
+                                <span class="badge bg-warning text-dark">Pending</span>
+                            {% elif transaction.status == 'received' %}
+                                <span class="badge bg-success">Received</span>
+                            {% else %}
+                                <span class="badge bg-secondary">
+                                    {{ transaction.status }}
+                                </span>
+                            {% endif %}
+                        </td>
+
+                        <td>
+                            {{ transaction.created_at.strftime('%Y-%m-%d %H:%M') }}
+                        </td>
+
+                        <td>
+                            {% if transaction.status == 'pending' %}
+                                <a href="{{ url_for('approve_transaction', transaction_id=transaction.id) }}"
+                                   class="btn btn-sm btn-success">
+                                    Approve
+                                </a>
+                            {% else %}
+                                <span class="text-muted">No action</span>
+                            {% endif %}
+                        </td>
+
+                    </tr>
+                    {% endfor %}
+                {% else %}
+                    <tr>
+                        <td colspan="6" class="text-center text-muted">
+                            No transactions found
+                        </td>
+                    </tr>
+                {% endif %}
+
+            </tbody>
+
+        </table>
+
+    </div>
 
 </div>
 

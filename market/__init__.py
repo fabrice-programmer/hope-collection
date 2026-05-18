@@ -20,4 +20,3 @@ login_manager.login_message_category = 'info'
 
 Session(app)
 
-from market import routes
