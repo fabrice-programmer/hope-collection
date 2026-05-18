@@ -414,3 +414,56 @@ def confirm_order(id):
     db.session.commit()
 
     return redirect(url_for('admin_orders'))
+
+
+
+@app.route('/transaction-history')
+@login_required
+def transaction_history():
+
+    transactions = Transaction.query.filter_by(user_id=current_user.id) \
+        .order_by(Transaction.created_at.desc()) \
+        .all()
+
+    return render_template(
+        'transaction_history.html',
+        transactions=transactions
+    )
+
+
+@app.route('/create-transaction')
+@login_required
+def create_transaction():
+
+    new_transaction = Transaction(
+        user_id=current_user.id,
+        amount=15000,
+        transaction_type='Deposit',
+        status='pending'
+    )
+
+    db.session.add(new_transaction)
+    db.session.commit()
+
+    flash('Transaction created successfully!', 'success')
+
+    return redirect(url_for('transaction_history'))
+
+@app.route('/approve-transaction/<int:transaction_id>')
+@login_required
+def approve_transaction(transaction_id):
+
+    transaction = Transaction.query.get_or_404(transaction_id)
+
+    transaction.status = 'received'
+
+    db.session.commit()
+
+    flash('Transaction approved successfully!', 'success')
+
+    return redirect(url_for('transaction_history'))
+
+
+
+
+
