@@ -20,3 +20,6 @@ login_manager.login_message_category = 'info'
 
 Session(app)
 
+# Register routes when the package is imported so app routes are available
+from market import routes
+

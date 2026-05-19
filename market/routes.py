@@ -173,12 +173,16 @@ def update_cart(item_id, quantity):
 @app.route('/checkout', methods=['POST'])
 @login_required
 def checkout():
-
+    form = CheckoutForm()
     cart = session.get('cart', [])
 
     if not cart:
         flash('Cart is empty', category='warning')
         return redirect(url_for('market_page'))
+
+    if not form.validate_on_submit():
+        flash('Please select a payment method before checking out.', category='warning')
+        return redirect(url_for('view_cart'))
 
     total_amount = sum(item['price'] * item['quantity'] for item in cart)
 
@@ -186,7 +190,7 @@ def checkout():
         user_id=current_user.id,
         items=json.dumps(cart),
         total_price=total_amount,
-        payment_method="cash",
+        payment_method=form.payment_method.data,
         status='pending'
     )
 
@@ -236,17 +240,17 @@ def top_up():
 @app.route('/top-up-confirmation/<int:request_id>')
 @login_required
 def top_up_confirmation(request_id):
-    req = db.session.get(TopUpRequest, request_id)
+    topup_request = db.session.get(TopUpRequest, request_id)
 
-    if req is None:
+    if topup_request is None:
         flash('Request not found', category='danger')
         return redirect(url_for('market_page'))
 
-    if req.user_id != current_user.id:
+    if topup_request.user_id != current_user.id:
         flash('Access denied', category='danger')
         return redirect(url_for('market_page'))
 
-    return render_template('top_up_confirmation.html', request=req)
+    return render_template('top_up_confirmation.html', topup_request=topup_request)
 
 
 @app.route('/my-top-ups')

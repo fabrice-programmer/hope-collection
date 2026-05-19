@@ -1,3 +1,4 @@
+import json
 from datetime import datetime, timedelta, timezone
 from market import db, bcrypt, login_manager
 from flask_login import UserMixin
@@ -104,6 +105,13 @@ class Order(db.Model):
 
     user     = db.relationship('User', foreign_keys=[user_id],     backref='orders')
     approver = db.relationship('User', foreign_keys=[approver_id], backref='approved_orders')
+
+    @property
+    def parsed_items(self):
+        try:
+            return json.loads(self.items)
+        except (TypeError, ValueError):
+            return []
 
     def __repr__(self):
         return f"Order(user_id={self.user_id}, total={self.total_price}, status={self.status})"
