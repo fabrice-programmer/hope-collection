@@ -263,10 +263,17 @@ def my_top_ups():
 @app.route('/transaction-history')
 @login_required
 def transaction_history():
+    orders = Order.query.filter_by(user_id=current_user.id)\
+        .order_by(Order.created_at.desc()).all()
+
     transactions = Transaction.query.filter_by(user_id=current_user.id)\
         .order_by(Transaction.created_at.desc()).all()
 
-    return render_template('transaction_history.html', transactions=transactions)
+    return render_template(
+        'transaction_history.html',
+        orders=orders,
+        transactions=transactions
+    )
 
 # -------------------------
 # ADMIN
