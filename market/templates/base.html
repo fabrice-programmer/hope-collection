@@ -52,7 +52,12 @@
                     <a class="nav-link" href="{{ url_for('top_up') }}">Top Up</a>
                 </li>
                 {% if current_user.id == 1 %}
-                <!-- Admin pages not implemented yet -->
+                <li class="nav-item">
+                    <a class="nav-link" href="{{ url_for('admin_dashboard') }}">Admin Dashboard</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="{{ url_for('top_up_requests') }}">Approve Top-ups</a>
+                </li>
                 {% endif %}
                 {% endif %}
             </ul>

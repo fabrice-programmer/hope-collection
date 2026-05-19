@@ -1,4 +1,4 @@
-from datetime import datetime, timezone
+from datetime import datetime, timedelta, timezone
 import json
 
 from market import app, db
@@ -267,3 +267,163 @@ def transaction_history():
         .order_by(Transaction.created_at.desc()).all()
 
     return render_template('transaction_history.html', transactions=transactions)
+
+# -------------------------
+# ADMIN
+# -------------------------
+@app.route('/admin')
+@login_required
+def admin_dashboard():
+    if not is_site_owner():
+        flash('Admin access only', category='danger')
+        return redirect(url_for('market_page'))
+
+    users = User.query.order_by(User.username).all()
+    items = Item.query.order_by(Item.name).all()
+    orders = Order.query.order_by(Order.created_at.desc()).all()
+    recent_orders = Order.query.order_by(Order.created_at.desc()).limit(10).all()
+    requests = TopUpRequest.query.order_by(TopUpRequest.created_at.desc()).all()
+
+    pending_orders = Order.query.filter_by(status='pending').count()
+    pending_requests = TopUpRequest.query.filter_by(status='pending').count()
+    total_customers = User.query.count()
+    total_items = Item.query.count()
+    total_orders = Order.query.count()
+    total_revenue = db.session.query(db.func.coalesce(db.func.sum(Order.total_price), 0)).scalar() or 0
+
+    now = datetime.now(timezone.utc)
+    monthly_labels = []
+    monthly_sales = []
+    for months_back in range(5, -1, -1):
+        month_start = datetime(now.year, now.month, 1, tzinfo=timezone.utc)
+        target_month = month_start - timedelta(days=months_back * 30)
+        label = target_month.strftime('%b %Y')
+        month_end = datetime(target_month.year, target_month.month, 1, tzinfo=timezone.utc) + timedelta(days=32)
+        month_end = month_end.replace(day=1)
+        sales = db.session.query(db.func.coalesce(db.func.sum(Order.total_price), 0)).filter(
+            Order.created_at >= target_month,
+            Order.created_at < month_end
+        ).scalar() or 0
+        monthly_labels.append(label)
+        monthly_sales.append(int(sales))
+
+    product_counts = {}
+    for order in Order.query.all():
+        try:
+            items_data = json.loads(order.items)
+        except (TypeError, ValueError):
+            continue
+        for item in items_data:
+            product_counts[item.get('name', 'Unknown')] = product_counts.get(item.get('name', 'Unknown'), 0) + item.get('quantity', 0)
+
+    top_products = sorted(product_counts.items(), key=lambda kv: kv[1], reverse=True)[:5]
+    top_product_labels = [label for label, _ in top_products]
+    top_product_values = [value for _, value in top_products]
+
+    conversion_rate = round((total_orders / max(total_customers, 1)) * 100, 1) if total_customers else 0
+    revenue_change_text = 'Steady performance' if total_revenue else 'No revenue yet'
+
+    return render_template(
+        'admin_dashboard.html',
+        users=users,
+        items=items,
+        requests=requests,
+        orders=orders,
+        recent_orders=recent_orders,
+        pending_orders=pending_orders,
+        pending_requests=pending_requests,
+        total_revenue=total_revenue,
+        total_orders=total_orders,
+        total_customers=total_customers,
+        total_items=total_items,
+        conversion_rate=conversion_rate,
+        revenue_change_text=revenue_change_text,
+        monthly_labels=monthly_labels,
+        monthly_sales=monthly_sales,
+        top_product_labels=top_product_labels,
+        top_product_values=top_product_values
+    )
+
+
+@app.route('/admin/top-up-requests')
+@login_required
+def top_up_requests():
+    if not is_site_owner():
+        flash('Admin access only', category='danger')
+        return redirect(url_for('market_page'))
+
+    requests = TopUpRequest.query.order_by(TopUpRequest.created_at.desc()).all()
+    return render_template('top_up_requests.html', requests=requests)
+
+
+@app.route('/admin/top-up-requests/<int:request_id>/<action>')
+@login_required
+def manage_top_up_request(request_id, action):
+    if not is_site_owner():
+        flash('Admin access only', category='danger')
+        return redirect(url_for('market_page'))
+
+    req = db.session.get(TopUpRequest, request_id)
+    if req is None:
+        flash('Top-up request not found', category='danger')
+        return redirect(url_for('top_up_requests'))
+
+    if req.status != 'pending':
+        flash('This request has already been processed.', category='info')
+        return redirect(url_for('top_up_requests'))
+
+    if action == 'approve':
+        req.status = 'approved'
+        req.reviewed_at = datetime.now(timezone.utc)
+        req.reviewer_id = current_user.id
+        user = db.session.get(User, req.user_id)
+        if user:
+            user.budget += req.amount
+        flash(f'Top-up request #{req.id} approved.', category='success')
+    elif action == 'decline':
+        req.status = 'declined'
+        req.reviewed_at = datetime.now(timezone.utc)
+        req.reviewer_id = current_user.id
+        flash(f'Top-up request #{req.id} declined.', category='warning')
+    else:
+        flash('Invalid action.', category='danger')
+        return redirect(url_for('top_up_requests'))
+
+    db.session.commit()
+    return redirect(url_for('top_up_requests'))
+
+
+@app.route('/admin/orders/<int:order_id>/<action>')
+@login_required
+def manage_order(order_id, action):
+    if not is_site_owner():
+        flash('Admin access only', category='danger')
+        return redirect(url_for('market_page'))
+
+    order = db.session.get(Order, order_id)
+    if order is None:
+        flash('Order not found.', category='danger')
+        return redirect(url_for('admin_dashboard'))
+
+    if action == 'approve' and order.status == 'pending':
+        order.status = 'approved'
+        flash(f'Order #{order.id} approved.', category='success')
+    elif action == 'decline' and order.status == 'pending':
+        order.status = 'cancelled'
+        flash(f'Order #{order.id} declined.', category='warning')
+    elif action == 'complete' and order.status == 'approved':
+        order.status = 'completed'
+        transaction = Transaction.query.filter_by(
+            user_id=order.user_id,
+            amount=order.total_price,
+            transaction_type='Order'
+        ).order_by(Transaction.id.desc()).first()
+        if transaction:
+            transaction.status = 'completed'
+        flash(f'Order #{order.id} marked completed.', category='success')
+    else:
+        flash('Invalid order action or order state.', category='danger')
+        return redirect(url_for('admin_dashboard'))
+
+    db.session.commit()
+    return redirect(url_for('admin_dashboard'))

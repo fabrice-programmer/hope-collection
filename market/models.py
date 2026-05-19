@@ -82,6 +82,7 @@ class TopUpRequest(db.Model):
     expires_at  = db.Column(db.DateTime, nullable=False, default=lambda: datetime.now(timezone.utc) + timedelta(hours=24))
     reviewed_at = db.Column(db.DateTime)
     reviewer_id = db.Column(db.Integer, db.ForeignKey('user.id'))
+    user = db.relationship('User', foreign_keys=[user_id], overlaps='requester,top_up_requests')
 
     def __repr__(self):
         return f"TopUpRequest(user_id={self.user_id}, amount={self.amount}, status={self.status})"
