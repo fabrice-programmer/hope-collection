@@ -47,6 +47,7 @@
                             <th>Order</th>
                             <th>Total</th>
                             <th>Payment</th>
+                            <th>Location</th>
                             <th>Status</th>
                             <th>Date</th>
                             <th>Items</th>
@@ -58,6 +59,12 @@
                             <td>#{{ order.id }}</td>
                             <td><strong>{{ order.total_price }} RWF</strong></td>
                             <td>{{ order.payment_method }}</td>
+                            <td>
+                                {{ order.street }}, {{ order.district }}, {{ order.sector }}
+                                {% if order.location_note %}
+                                <div class="text-muted small">{{ order.location_note }}</div>
+                                {% endif %}
+                            </td>
                             <td>
                                 <span class="badge bg-secondary text-dark">
                                     {{ order.status|capitalize }}

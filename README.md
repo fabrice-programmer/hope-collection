@@ -41,10 +41,12 @@ A complete Flask authentication system with user registration, login/logout func
 pip install -r requirements.txt
 ```
 
-### 2. Create the Database
+### 2. Create or migrate the Database
 ```bash
-python create_db.py
+python migrate_db.py
 ```
+
+The app stores its SQLite database in `instance/database.db`.
 
 ### 3. Run the Application
 ```bash

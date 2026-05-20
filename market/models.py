@@ -99,6 +99,10 @@ class Order(db.Model):
     items          = db.Column(db.Text, nullable=False)       # JSON string of cart items
     total_price    = db.Column(db.Integer, nullable=False)
     payment_method = db.Column(db.String(20), nullable=False)
+    sector         = db.Column(db.String(100), nullable=False)
+    district       = db.Column(db.String(100), nullable=False)
+    street         = db.Column(db.String(100), nullable=False)
+    location_note  = db.Column(db.String(255), nullable=True)
     status         = db.Column(db.String(20), nullable=False, default='pending')  # pending | approved | completed | cancelled
     created_at     = db.Column(db.DateTime, nullable=False, default=lambda: datetime.now(timezone.utc))  # ✅ FIXED: utcnow() deprecated
     approved_at    = db.Column(db.DateTime)

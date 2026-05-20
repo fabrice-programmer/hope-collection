@@ -89,15 +89,12 @@
                 <li class="nav-item">
                     <a class="nav-link px-3" href="{{ url_for('transaction_history') }}">Transactions</a>
                 </li>
-                <li class="nav-item">
-                    <a class="nav-link px-3" href="{{ url_for('top_up') }}">Top Up</a>
-                </li>
                 {% if current_user.id == 1 %}
                 <li class="nav-item">
                     <a class="nav-link" href="{{ url_for('admin_dashboard') }}">Admin Dashboard</a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link" href="{{ url_for('top_up_requests') }}">Approve Top-ups</a>
+                    <a class="nav-link" href="{{ url_for('top_up_requests') }}">Approve Payment Requests</a>
                 </li>
                 {% endif %}
                 {% endif %}

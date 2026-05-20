@@ -108,23 +108,24 @@
         </div>
     </div>
 
-    <!-- Top-up Requests Section -->
+    <!-- Payment Requests Section -->
     <div class="row">
         <div class="col-12">
             <div class="card shadow-sm">
                 <div class="card-header bg-dark text-white d-flex justify-content-between align-items-center">
-                    <h5 class="mb-0">Top-up Requests</h5>
+                    <h5 class="mb-0">Payment Requests</h5>
                     <a href="{{ url_for('top_up_requests') }}" class="btn btn-light btn-sm">View All</a>
                 </div>
                 <div class="card-body">
-                    <p class="mb-3">Recent top-up requests requiring approval.</p>
+                    <p class="mb-3">Recent payment requests from customer orders awaiting approval.</p>
                     {% if requests %}
                     <div class="table-responsive">
                         <table class="table table-sm table-hover">
                             <thead>
                                 <tr>
-                                    <th>User</th>
-                                    <th>Amount</th>
+                                    <th>Order</th>
+                                    <th>Customer</th>
+                                    <th>Total</th>
                                     <th>Method</th>
                                     <th>Status</th>
                                     <th>Requested At</th>
@@ -133,18 +134,27 @@
                             <tbody>
                                 {% for req in requests[:5] %} <!-- Show only first 5 -->
                                 <tr>
+                                    <td>#{{ req.id }}</td>
                                     <td>{{ req.user.username }}</td>
-                                    <td>RWF {{ req.amount }}</td>
-                                    <td>{{ 'MTN Mobile Money' if req.method == 'mtn' else 'Equity Bank Transfer' }}</td>
+                                    <td>RWF {{ req.total_price }}</td>
+                                    <td>
+                                        {% if req.payment_method == 'mtn' %}
+                                            MTN Mobile Money
+                                        {% elif req.payment_method == 'equity' %}
+                                            Equity Bank Transfer
+                                        {% else %}
+                                            Wallet Balance
+                                        {% endif %}
+                                    </td>
                                     <td>
                                         {% if req.status == 'pending' %}
                                             <span class="badge bg-warning text-dark">Pending</span>
                                         {% elif req.status == 'approved' %}
                                             <span class="badge bg-success">Approved</span>
-                                        {% elif req.status == 'expired' %}
-                                            <span class="badge bg-secondary">Expired</span>
+                                        {% elif req.status == 'completed' %}
+                                            <span class="badge bg-primary">Completed</span>
                                         {% else %}
-                                            <span class="badge bg-danger">Declined</span>
+                                            <span class="badge bg-danger">Cancelled</span>
                                         {% endif %}
                                     </td>
                                     <td>{{ req.created_at.strftime('%Y-%m-%d %H:%M') }}</td>
@@ -154,7 +164,7 @@
                         </table>
                     </div>
                     {% else %}
-                    <div class="alert alert-info">No top-up requests found.</div>
+                    <div class="alert alert-info">No payment requests found.</div>
                     {% endif %}
                 </div>
             </div>
@@ -178,6 +188,7 @@
                                 <tr>
                                     <th>Order ID</th>
                                     <th>Customer</th>
+                                    <th>Location</th>
                                     <th>Items</th>
                                     <th>Total</th>
                                     <th>Payment Method</th>
@@ -191,6 +202,12 @@
                                 <tr>
                                     <td>#{{ order.id }}</td>
                                     <td>{{ order.user.username }}</td>
+                                    <td>
+                                        {{ order.street }}, {{ order.district }}, {{ order.sector }}
+                                        {% if order.location_note %}
+                                        <div class="text-muted small">{{ order.location_note }}</div>
+                                        {% endif %}
+                                    </td>
                                     <td>
                                         {% for item in order.parsed_items %}
                                         {{ item.name }} (x{{ item.quantity }})

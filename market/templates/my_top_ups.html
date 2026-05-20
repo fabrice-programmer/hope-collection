@@ -5,11 +5,10 @@
     <div class="col-md-10">
         <div class="card shadow-sm">
             <div class="card-header bg-primary text-white">
-                <h3 class="mb-0">My Top-up Requests</h3>
-            </div>
-            <div class="card-body">
-                <p class="mb-4">This page shows the status of your top-up requests. Your wallet will be updated after the website owner approves the request.</p>
-
+                    <h3 class="mb-0">My Payment Requests</h3>
+                </div>
+                <div class="card-body">
+                    <p class="mb-4">This page shows the status of your payment requests. Your wallet will be updated after the website owner approves the request.</p>
                 {% if requests %}
                 <div class="table-responsive">
                     <table class="table table-bordered table-hover align-middle">
@@ -53,7 +52,7 @@
                 </div>
                 {% else %}
                 <div class="alert alert-info" role="alert">
-                    You have not submitted any top-up requests yet.
+                    You have not submitted any payment requests yet.
                 </div>
                 {% endif %}
             </div>

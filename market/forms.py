@@ -57,7 +57,7 @@ class LoginForm(FlaskForm):
 
 class TopUpForm(FlaskForm):
     amount = IntegerField(
-        label='Top Up Amount (RWF)',
+        label='Payment Amount (RWF)',
         validators=[DataRequired(), NumberRange(min=100, message='Enter an amount of at least 100 RWF')]
     )
     payment_method = RadioField(
@@ -68,10 +68,30 @@ class TopUpForm(FlaskForm):
         ],
         validators=[DataRequired()]
     )
-    submit = SubmitField(label='Request Top Up')
+    submit = SubmitField(label='Submit Payment Request')
 
 
 class CheckoutForm(FlaskForm):
+
+    sector = StringField(
+        label='Sector',
+        validators=[DataRequired(), Length(max=100)]
+    )
+
+    district = StringField(
+        label='District',
+        validators=[DataRequired(), Length(max=100)]
+    )
+
+    street = StringField(
+        label='Street',
+        validators=[DataRequired(), Length(max=100)]
+    )
+
+    location_note = StringField(
+        label='Landmark / Additional Location Info',
+        validators=[Length(max=255)]
+    )
 
     payment_method = RadioField(
         label='Select Payment Method',
@@ -83,7 +103,7 @@ class CheckoutForm(FlaskForm):
         validators=[DataRequired()]
     )
 
-    submit = SubmitField(label='Complete Checkout')    
+    submit = SubmitField(label='Complete Checkout')
 
 
 

@@ -191,6 +191,10 @@ def checkout():
         items=json.dumps(cart),
         total_price=total_amount,
         payment_method=form.payment_method.data,
+        sector=form.sector.data,
+        district=form.district.data,
+        street=form.street.data,
+        location_note=form.location_note.data,
         status='pending'
     )
 
@@ -214,50 +218,27 @@ def checkout():
 
 
 # -------------------------
-# TOP UPS (UNCHANGED)
+# LEGACY TOP-UP ROUTES
 # -------------------------
 @app.route('/top-up', methods=['GET', 'POST'])
 @login_required
 def top_up():
-    form = TopUpForm()
-
-    if form.validate_on_submit():
-        req = TopUpRequest(
-            user_id=current_user.id,
-            amount=form.amount.data,
-            method=form.payment_method.data,
-            status='pending'
-        )
-
-        db.session.add(req)
-        db.session.commit()
-
-        return redirect(url_for('top_up_confirmation', request_id=req.id))
-
-    return render_template('top_up.html', form=form)
+    flash('Use the order summary on the cart page to proceed with payment and review your order details.', category='info')
+    return redirect(url_for('view_cart'))
 
 
 @app.route('/top-up-confirmation/<int:request_id>')
 @login_required
 def top_up_confirmation(request_id):
-    topup_request = db.session.get(TopUpRequest, request_id)
-
-    if topup_request is None:
-        flash('Request not found', category='danger')
-        return redirect(url_for('market_page'))
-
-    if topup_request.user_id != current_user.id:
-        flash('Access denied', category='danger')
-        return redirect(url_for('market_page'))
-
-    return render_template('top_up_confirmation.html', topup_request=topup_request)
+    flash('Payment confirmation has moved to the order summary flow. Review your cart to proceed.', category='info')
+    return redirect(url_for('view_cart'))
 
 
 @app.route('/my-top-ups')
 @login_required
 def my_top_ups():
-    requests = TopUpRequest.query.filter_by(user_id=current_user.id).order_by(TopUpRequest.id.desc()).all()
-    return render_template('my_top_ups.html', requests=requests)
+    flash('Payment request tracking is now handled through your transaction history.', category='info')
+    return redirect(url_for('transaction_history'))
 
 
 @app.route('/transaction-history')
@@ -289,10 +270,10 @@ def admin_dashboard():
     items = Item.query.order_by(Item.name).all()
     orders = Order.query.order_by(Order.created_at.desc()).all()
     recent_orders = Order.query.order_by(Order.created_at.desc()).limit(10).all()
-    requests = TopUpRequest.query.order_by(TopUpRequest.created_at.desc()).all()
+    requests = Order.query.filter_by(status='pending').order_by(Order.created_at.desc()).all()
 
     pending_orders = Order.query.filter_by(status='pending').count()
-    pending_requests = TopUpRequest.query.filter_by(status='pending').count()
+    pending_requests = pending_orders
     total_customers = User.query.count()
     total_items = Item.query.count()
     total_orders = Order.query.count()
@@ -359,39 +340,43 @@ def top_up_requests():
         flash('Admin access only', category='danger')
         return redirect(url_for('market_page'))
 
-    requests = TopUpRequest.query.order_by(TopUpRequest.created_at.desc()).all()
-    return render_template('top_up_requests.html', requests=requests)
+    orders = Order.query.filter_by(status='pending').order_by(Order.created_at.desc()).all()
+    return render_template('top_up_requests.html', orders=orders)
 
 
-@app.route('/admin/top-up-requests/<int:request_id>/<action>')
+@app.route('/admin/top-up-requests/<int:order_id>/<action>')
 @login_required
-def manage_top_up_request(request_id, action):
+def manage_top_up_request(order_id, action):
     if not is_site_owner():
         flash('Admin access only', category='danger')
         return redirect(url_for('market_page'))
 
-    req = db.session.get(TopUpRequest, request_id)
-    if req is None:
-        flash('Top-up request not found', category='danger')
+    order = db.session.get(Order, order_id)
+    if order is None:
+        flash('Payment request not found', category='danger')
         return redirect(url_for('top_up_requests'))
 
-    if req.status != 'pending':
+    if order.status != 'pending':
         flash('This request has already been processed.', category='info')
         return redirect(url_for('top_up_requests'))
 
     if action == 'approve':
-        req.status = 'approved'
-        req.reviewed_at = datetime.now(timezone.utc)
-        req.reviewer_id = current_user.id
-        user = db.session.get(User, req.user_id)
-        if user:
-            user.budget += req.amount
-        flash(f'Top-up request #{req.id} approved.', category='success')
+        order.status = 'approved'
+        order.approved_at = datetime.now(timezone.utc)
+        order.approver_id = current_user.id
+        transaction = Transaction.query.filter_by(
+            user_id=order.user_id,
+            amount=order.total_price,
+            transaction_type='Order'
+        ).order_by(Transaction.id.desc()).first()
+        if transaction:
+            transaction.status = 'approved'
+        flash(f'Payment request for Order #{order.id} approved.', category='success')
     elif action == 'decline':
-        req.status = 'declined'
-        req.reviewed_at = datetime.now(timezone.utc)
-        req.reviewer_id = current_user.id
-        flash(f'Top-up request #{req.id} declined.', category='warning')
+        order.status = 'cancelled'
+        order.approved_at = datetime.now(timezone.utc)
+        order.approver_id = current_user.id
+        flash(f'Payment request for Order #{order.id} declined.', category='warning')
     else:
         flash('Invalid action.', category='danger')
         return redirect(url_for('top_up_requests'))
@@ -414,9 +399,20 @@ def manage_order(order_id, action):
 
     if action == 'approve' and order.status == 'pending':
         order.status = 'approved'
+        order.approved_at = datetime.now(timezone.utc)
+        order.approver_id = current_user.id
+        transaction = Transaction.query.filter_by(
+            user_id=order.user_id,
+            amount=order.total_price,
+            transaction_type='Order'
+        ).order_by(Transaction.id.desc()).first()
+        if transaction:
+            transaction.status = 'approved'
         flash(f'Order #{order.id} approved.', category='success')
     elif action == 'decline' and order.status == 'pending':
         order.status = 'cancelled'
+        order.approved_at = datetime.now(timezone.utc)
+        order.approver_id = current_user.id
         flash(f'Order #{order.id} declined.', category='warning')
     elif action == 'complete' and order.status == 'approved':
         order.status = 'completed'

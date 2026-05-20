@@ -22,11 +22,11 @@
                         <h1 class="text-2xl font-semibold">Sales Dashboard</h1>
                     </div>
                 </div>
-                <p class="text-sm text-slate-500 dark:text-slate-400">Review orders, top-ups, and revenue at a glance.</p>
+                <p class="text-sm text-slate-500 dark:text-slate-400">Review orders, payment requests, and revenue at a glance.</p>
             </div>
             <nav class="space-y-2">
                 <a href="{{ url_for('admin_dashboard') }}" class="block rounded-3xl px-4 py-3 bg-indigo-600 text-white shadow-soft">Dashboard</a>
-                <a href="{{ url_for('top_up_requests') }}" class="block rounded-3xl px-4 py-3 text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800">Top-up Requests</a>
+                    <a href="{{ url_for('top_up_requests') }}" class="block rounded-3xl px-4 py-3 text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800">Payment Requests</a>
                 <a href="{{ url_for('market_page') }}" class="block rounded-3xl px-4 py-3 text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800">Market</a>
                 <a href="{{ url_for('logout_page') }}" class="block rounded-3xl px-4 py-3 text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800">Logout</a>
             </nav>
@@ -57,7 +57,7 @@
                             <p class="text-2xl font-semibold">{{ pending_orders }}</p>
                         </div>
                         <div class="rounded-3xl bg-white dark:bg-slate-900 p-4 shadow-soft border border-slate-200 dark:border-slate-800">
-                            <p class="text-sm text-slate-500 dark:text-slate-400">Pending Top-ups</p>
+                            <p class="text-sm text-slate-500 dark:text-slate-400">Pending Payment Requests</p>
                             <p class="text-2xl font-semibold">{{ pending_requests }}</p>
                         </div>
                     </div>

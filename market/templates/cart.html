@@ -91,19 +91,50 @@
 
                     <div class="card mb-3">
                         <div class="card-header bg-light">
-                            <h6 class="mb-0">Payment Method</h6>
+                            <h6 class="mb-0">Delivery Location</h6>
                         </div>
                         <div class="card-body">
                             <form method="POST" action="{{ url_for('checkout') }}">
                                 {{ form.hidden_tag() }}
-                                {% for subfield in form.payment_method %}
-                                <div class="form-check mb-2">
-                                    {{ subfield(class_='form-check-input') }}
-                                    <label class="form-check-label">
-                                        {{ subfield.label.text }}
-                                    </label>
+                                <div class="mb-3">
+                                    {{ form.sector.label(class_='form-label fw-semibold') }}
+                                    {{ form.sector(class_='form-control form-control-sm', placeholder='Enter sector') }}
+                                    {% if form.sector.errors %}
+                                    <div class="text-danger small mt-1">{{ form.sector.errors[0] }}</div>
+                                    {% endif %}
                                 </div>
-                                {% endfor %}
+                                <div class="mb-3">
+                                    {{ form.district.label(class_='form-label fw-semibold') }}
+                                    {{ form.district(class_='form-control form-control-sm', placeholder='Enter district') }}
+                                    {% if form.district.errors %}
+                                    <div class="text-danger small mt-1">{{ form.district.errors[0] }}</div>
+                                    {% endif %}
+                                </div>
+                                <div class="mb-3">
+                                    {{ form.street.label(class_='form-label fw-semibold') }}
+                                    {{ form.street(class_='form-control form-control-sm', placeholder='Enter street') }}
+                                    {% if form.street.errors %}
+                                    <div class="text-danger small mt-1">{{ form.street.errors[0] }}</div>
+                                    {% endif %}
+                                </div>
+                                <div class="mb-3">
+                                    {{ form.location_note.label(class_='form-label fw-semibold') }}
+                                    {{ form.location_note(class_='form-control form-control-sm', placeholder='Enter landmark or additional directions (optional)') }}
+                                    {% if form.location_note.errors %}
+                                    <div class="text-danger small mt-1">{{ form.location_note.errors[0] }}</div>
+                                    {% endif %}
+                                </div>
+                                <div class="mb-3">
+                                    <div class="form-label fw-semibold">Payment Method</div>
+                                    {% for subfield in form.payment_method %}
+                                    <div class="form-check mb-2">
+                                        {{ subfield(class_='form-check-input') }}
+                                        <label class="form-check-label">
+                                            {{ subfield.label.text }}
+                                        </label>
+                                    </div>
+                                    {% endfor %}
+                                </div>
 
                                 <div class="alert alert-secondary mt-3" role="alert">
                                     <strong>MTN Mobile Money:</strong> pay to <strong>0789174857</strong>
@@ -122,9 +153,9 @@
                     <div class="alert alert-warning alert-sm" role="alert">
                         ✗ Insufficient wallet balance: you need RWF {{ total_price - current_user.budget }} more.
                     </div>
-                    <a href="{{ url_for('top_up') }}" class="btn btn-outline-warning w-100 mb-2">
-                        ⚡ Top Up Wallet
-                    </a>
+                    <p class="text-muted small mb-3">
+                        If your wallet balance is insufficient, choose an external payment method and proceed to payment from the order summary.
+                    </p>
                     {% endif %}
                 {% else %}
                     <p class="text-muted text-center">No items in cart</p>
@@ -143,34 +174,5 @@
             </div>
         </div>
 
-        <!-- Payment Instructions Card -->
-        <div class="card mt-3">
-            <div class="card-header bg-secondary text-white">
-                <h6 class="mb-0">📲 Add Money</h6>
-            </div>
-            <div class="card-body">
-                <p class="mb-2">Use one of the options below to add money to your wallet.</p>
-                <ul class="list-group list-group-flush mb-3">
-                    <li class="list-group-item p-2">
-                        <strong>MTN Mobile Money:</strong>
-                        <br>
-                        Pay to <strong>0789174857</strong>
-                    </li>
-                    <li class="list-group-item p-2">
-                        <strong>Equity Bank:</strong>
-                        <br>
-                        Account: <strong>4002100815300</strong>
-                    </li>
-                </ul>
-                <a href="{{ url_for('top_up') }}" class="btn btn-outline-primary w-100 mb-2">
-                    Go to Top Up Page
-                </a>
-                <a href="{{ url_for('my_top_ups') }}" class="btn btn-outline-secondary w-100">
-                    View My Top Up Requests
-                </a>
-            </div>
-        </div>
-    </div>
-</div>
 
 {% endblock %}
