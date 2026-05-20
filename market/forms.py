@@ -55,6 +55,33 @@ class LoginForm(FlaskForm):
     submit = SubmitField(label='Sign In')
 
 
+class RequestResetForm(FlaskForm):
+    email_address = StringField(
+        label='Email Address:',
+        validators=[DataRequired(), Email()]
+    )
+    submit = SubmitField(label='Send Reset Link')
+
+    def validate_email_address(self, email_address_to_check):
+        user = User.query.filter_by(email_address=email_address_to_check.data).first()
+        if user is None:
+            raise ValidationError('No account is registered with that email address.')
+
+
+class ResetPasswordForm(FlaskForm):
+    password1 = PasswordField(
+        label='New Password:',
+        validators=[DataRequired(), Length(min=6)]
+    )
+
+    password2 = PasswordField(
+        label='Confirm New Password:',
+        validators=[DataRequired(), EqualTo('password1')]
+    )
+
+    submit = SubmitField(label='Update Password')
+
+
 class TopUpForm(FlaskForm):
     amount = IntegerField(
         label='Payment Amount (RWF)',

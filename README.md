@@ -48,7 +48,41 @@ python migrate_db.py
 
 The app stores its SQLite database in `instance/database.db`.
 
-### 3. Run the Application
+### 3. Configure Email for Password Reset
+
+The app uses **Flask-Mail** to send password reset emails. You can use Gmail, Outlook, or any SMTP provider.
+
+#### Option A: Using Gmail (Recommended)
+1. Enable "App Passwords" in your Google Account:
+   - Go to [myaccount.google.com/security](https://myaccount.google.com/security)
+   - Enable 2-Step Verification if not already enabled
+   - Under "App passwords", select "Mail" and "Windows Computer"
+   - Copy the generated 16-character password
+
+2. Set environment variables (Windows PowerShell):
+```powershell
+$env:MAIL_SERVER = "smtp.gmail.com"
+$env:MAIL_PORT = "587"
+$env:MAIL_USERNAME = "your-email@gmail.com"
+$env:MAIL_PASSWORD = "your-app-password"
+$env:MAIL_USE_TLS = "True"
+$env:MAIL_DEFAULT_SENDER = "your-email@gmail.com"
+```
+
+#### Option B: Using Outlook
+```powershell
+$env:MAIL_SERVER = "smtp-mail.outlook.com"
+$env:MAIL_PORT = "587"
+$env:MAIL_USERNAME = "your-email@outlook.com"
+$env:MAIL_PASSWORD = "your-password"
+$env:MAIL_USE_TLS = "True"
+$env:MAIL_DEFAULT_SENDER = "your-email@outlook.com"
+```
+
+#### Option C: Other SMTP Providers
+Replace `MAIL_SERVER`, `MAIL_PORT`, `MAIL_USERNAME`, and `MAIL_PASSWORD` with your provider's details.
+
+### 4. Run the Application
 ```bash
 python run.py
 ```

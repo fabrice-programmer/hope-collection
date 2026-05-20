@@ -1,12 +1,20 @@
 from datetime import datetime, timedelta, timezone
 import json
 
-from market import app, db
-from flask import render_template, redirect, url_for, flash, session
+from market import app, db, mail
+from flask import render_template, redirect, url_for, flash, session, current_app
 from flask_login import login_user, logout_user, login_required, current_user
+from flask_mail import Message
 
 from market.models import Item, User, TopUpRequest, Order, Transaction
-from market.forms import RegisterForm, LoginForm, TopUpForm, CheckoutForm
+from market.forms import (
+    RegisterForm,
+    LoginForm,
+    TopUpForm,
+    CheckoutForm,
+    RequestResetForm,
+    ResetPasswordForm
+)
 
 
 # -------------------------
@@ -255,6 +263,76 @@ def transaction_history():
         orders=orders,
         transactions=transactions
     )
+
+
+def send_reset_email(user):
+    token = user.get_reset_token()
+    reset_url = url_for('reset_token', token=token, _external=True)
+    subject = 'Reset Your Password'
+    body = f"""
+Hello {user.username},
+
+A password reset has been requested for your account. Click the link below to set a new password:
+
+{reset_url}
+
+If you did not request this password change, ignore this message. This link expires in 30 minutes.
+
+Best regards,
+The Market Team
+"""
+    
+    try:
+        msg = Message(
+            subject=subject,
+            recipients=[user.email_address],
+            body=body,
+            sender=current_app.config['MAIL_DEFAULT_SENDER']
+        )
+        mail.send(msg)
+        flash('A password reset email has been sent. Check your inbox.', 'success')
+        return True
+    except Exception as error:
+        current_app.logger.error('Reset email failed: %s', error)
+        flash('Could not send the reset email. Please try again later or contact support.', 'danger')
+        return False
+
+
+@app.route('/reset-password', methods=['GET', 'POST'])
+def reset_request():
+    if current_user.is_authenticated:
+        return redirect(url_for('market_page'))
+
+    form = RequestResetForm()
+    if form.validate_on_submit():
+        user = User.query.filter_by(email_address=form.email_address.data).first()
+        if user:
+            if send_reset_email(user):
+                return redirect(url_for('login_page'))
+        else:
+            flash('No account found with that email address.', 'info')
+
+    return render_template('reset_request.html', form=form)
+
+
+@app.route('/reset-password/<token>', methods=['GET', 'POST'])
+def reset_token(token):
+    if current_user.is_authenticated:
+        return redirect(url_for('market_page'))
+
+    user = User.verify_reset_token(token)
+    if user is None:
+        flash('That reset link is invalid or has expired.', 'warning')
+        return redirect(url_for('reset_request'))
+
+    form = ResetPasswordForm()
+    if form.validate_on_submit():
+        user.password = form.password1.data
+        db.session.commit()
+        flash('Your password has been updated! You can now log in.', 'success')
+        return redirect(url_for('login_page'))
+
+    return render_template('reset_token.html', form=form)
 
 # -------------------------
 # ADMIN

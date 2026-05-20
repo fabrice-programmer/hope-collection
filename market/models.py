@@ -1,5 +1,7 @@
 import json
 from datetime import datetime, timedelta, timezone
+from flask import current_app
+from itsdangerous import URLSafeTimedSerializer
 from market import db, bcrypt, login_manager
 from flask_login import UserMixin
 
@@ -45,6 +47,19 @@ class User(db.Model, UserMixin):  # ✅ FIXED: only ONE User class (merged both 
         return bcrypt.check_password_hash(
             self.password_hash, attempted_password
         )
+
+    def get_reset_token(self, expires_sec=1800):
+        serializer = URLSafeTimedSerializer(current_app.config['SECRET_KEY'])
+        return serializer.dumps({'user_id': self.id}, salt='password-reset-salt')
+
+    @staticmethod
+    def verify_reset_token(token, expires_sec=1800):
+        serializer = URLSafeTimedSerializer(current_app.config['SECRET_KEY'])
+        try:
+            data = serializer.loads(token, salt='password-reset-salt', max_age=expires_sec)
+        except Exception:
+            return None
+        return db.session.get(User, data.get('user_id'))
 
     def __repr__(self):
         return f"User('{self.username}')"
