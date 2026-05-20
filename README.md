@@ -50,7 +50,7 @@ The app stores its SQLite database in `instance/database.db`.
 
 ### 3. Configure Email for Password Reset
 
-The app uses **Flask-Mail** to send password reset emails. You can use Gmail, Outlook, or any SMTP provider.
+The app sends password reset emails using direct SMTP (`smtplib`). You must configure Gmail SMTP credentials using environment variables.
 
 #### Option A: Using Gmail (Recommended)
 1. Enable "App Passwords" in your Google Account:
@@ -70,7 +70,12 @@ $env:MAIL_USE_SSL = "False"
 $env:MAIL_DEFAULT_SENDER = "your-email@gmail.com"
 ```
 
-> If port 587/TLS does not work, use port 465 and set `MAIL_USE_SSL=True` instead.
+> If the TLS connection fails, use port `465` and set `MAIL_USE_SSL=True` instead.
+
+#### Optional Gmail troubleshooting
+- Make sure `MAIL_USERNAME` and `MAIL_DEFAULT_SENDER` are the same Gmail address.
+- Use an App Password, not your regular Google password.
+- Check your spam folder if the email does not appear.
 
 #### Option B: Using Outlook
 ```powershell
@@ -79,6 +84,7 @@ $env:MAIL_PORT = "587"
 $env:MAIL_USERNAME = "your-email@outlook.com"
 $env:MAIL_PASSWORD = "your-password"
 $env:MAIL_USE_TLS = "True"
+$env:MAIL_USE_SSL = "False"
 $env:MAIL_DEFAULT_SENDER = "your-email@outlook.com"
 ```
 
