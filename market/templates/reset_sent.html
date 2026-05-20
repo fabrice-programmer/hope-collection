@@ -1,0 +1,31 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-6">
+        <div class="card shadow-lg mt-5">
+            <div class="card-body p-5 text-center">
+                <h2 class="card-title mb-4">Password Reset Requested</h2>
+                <p class="text-muted mb-4">
+                    If an account exists with the email address you provided, a password reset link has been sent.
+                </p>
+                <p class="mb-4">
+                    Check your inbox and spam folder, then click the reset link to create a new password.
+                </p>
+
+                {% if email_failed %}
+                    <div class="alert alert-warning">
+                        <p class="mb-2"><strong>Unable to send the reset email.</strong></p>
+                        <p class="mb-0">{{ failure_message }}</p>
+                        <p class="mt-2 mb-0">Please verify your email configuration and try again.</p>
+                    </div>
+                {% endif %}
+
+                <a href="{{ url_for('login_page') }}" class="btn btn-primary">
+                    Back to Login
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

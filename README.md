@@ -66,8 +66,11 @@ $env:MAIL_PORT = "587"
 $env:MAIL_USERNAME = "your-email@gmail.com"
 $env:MAIL_PASSWORD = "your-app-password"
 $env:MAIL_USE_TLS = "True"
+$env:MAIL_USE_SSL = "False"
 $env:MAIL_DEFAULT_SENDER = "your-email@gmail.com"
 ```
+
+> If port 587/TLS does not work, use port 465 and set `MAIL_USE_SSL=True` instead.
 
 #### Option B: Using Outlook
 ```powershell

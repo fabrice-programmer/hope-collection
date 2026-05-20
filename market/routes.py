@@ -1,10 +1,12 @@
 from datetime import datetime, timedelta, timezone
 import json
+import smtplib
+from email.mime.multipart import MIMEMultipart
+from email.mime.text import MIMEText
 
-from market import app, db, mail
+from market import app, db
 from flask import render_template, redirect, url_for, flash, session, current_app
 from flask_login import login_user, logout_user, login_required, current_user
-from flask_mail import Message
 
 from market.models import Item, User, TopUpRequest, Order, Transaction
 from market.forms import (
@@ -281,21 +283,50 @@ If you did not request this password change, ignore this message. This link expi
 Best regards,
 The Market Team
 """
-    
+
+    sender = current_app.config['MAIL_DEFAULT_SENDER']
+    recipient = user.email_address
+    mail_server = current_app.config.get('MAIL_SERVER')
+    mail_port = current_app.config.get('MAIL_PORT', 587)
+    mail_username = current_app.config.get('MAIL_USERNAME')
+    mail_password = current_app.config.get('MAIL_PASSWORD')
+    use_tls = current_app.config.get('MAIL_USE_TLS', True)
+
+    message = MIMEMultipart()
+    message['From'] = sender
+    message['To'] = recipient
+    message['Subject'] = subject
+    message.attach(MIMEText(body, 'plain'))
+
+    if not mail_username or not mail_password:
+        current_app.logger.warning('Mail username or password is not configured.')
+        return False, 'Email credentials are missing. Set MAIL_USERNAME and MAIL_PASSWORD, then try again.'
+
     try:
-        msg = Message(
-            subject=subject,
-            recipients=[user.email_address],
-            body=body,
-            sender=current_app.config['MAIL_DEFAULT_SENDER']
-        )
-        mail.send(msg)
+        if current_app.config.get('MAIL_USE_SSL'):
+            server = smtplib.SMTP_SSL(mail_server, mail_port, timeout=15)
+        else:
+            server = smtplib.SMTP(mail_server, mail_port, timeout=15)
+
+        with server as smtp:
+            smtp.ehlo()
+            if not current_app.config.get('MAIL_USE_SSL') and use_tls:
+                smtp.starttls()
+                smtp.ehlo()
+            smtp.login(mail_username, mail_password)
+            smtp.sendmail(sender, recipient, message.as_string())
+
         flash('A password reset email has been sent. Check your inbox.', 'success')
-        return True
+        return True, None
+    except smtplib.SMTPAuthenticationError as error:
+        current_app.logger.error('SMTP auth failed: %s', error)
+        return False, 'Email login failed. Use a valid email and App Password (Gmail) and retry.'
+    except smtplib.SMTPRecipientsRefused as error:
+        current_app.logger.error('SMTP recipients refused: %s', error)
+        return False, 'Your mail server rejected the recipient address. Check MAIL_USERNAME and MAIL_DEFAULT_SENDER.'
     except Exception as error:
         current_app.logger.error('Reset email failed: %s', error)
-        flash('Could not send the reset email. Please try again later or contact support.', 'danger')
-        return False
+        return False, 'Email delivery failed. Verify SMTP settings, enable App Passwords for Gmail, and try again.'
 
 
 @app.route('/reset-password', methods=['GET', 'POST'])
@@ -307,12 +338,18 @@ def reset_request():
     if form.validate_on_submit():
         user = User.query.filter_by(email_address=form.email_address.data).first()
         if user:
-            if send_reset_email(user):
-                return redirect(url_for('login_page'))
-        else:
-            flash('No account found with that email address.', 'info')
+            sent, failure_message = send_reset_email(user)
+            if not sent:
+                return render_template('reset_sent.html', email_failed=True, failure_message=failure_message)
+        flash('If an account exists for that email, a reset link has been sent.', 'info')
+        return redirect(url_for('reset_sent'))
 
     return render_template('reset_request.html', form=form)
+
+
+@app.route('/reset-password-sent')
+def reset_sent():
+    return render_template('reset_sent.html')
 
 
 @app.route('/reset-password/<token>', methods=['GET', 'POST'])
