@@ -1,15 +1,11 @@
 from datetime import datetime, timedelta, timezone
-from email.utils import formataddr
 import json
-import socket
-import smtplib
-from email.mime.multipart import MIMEMultipart
-from email.mime.text import MIMEText
 
 from market import app, db
 from flask import render_template, redirect, url_for, flash, session, current_app
 from flask_login import login_user, logout_user, login_required, current_user
 
+from market.email_utils import send_email
 from market.models import Item, User, TopUpRequest, Order, Transaction
 from market.forms import (
     RegisterForm,
@@ -17,7 +13,8 @@ from market.forms import (
     TopUpForm,
     CheckoutForm,
     RequestResetForm,
-    ResetPasswordForm
+    ResetPasswordForm,
+    TestEmailForm
 )
 
 
@@ -61,6 +58,22 @@ def register_page():
         db.session.commit()
 
         login_user(user_to_create)
+        welcome_sent, welcome_error = send_email(
+            to=user_to_create.email_address,
+            subject='Welcome to Market App',
+            message=f"""Hello {user_to_create.username},
+
+Welcome to Market App. Your account has been created successfully.
+
+You can now log in, browse items, and place orders.
+
+Best regards,
+The Market Team
+"""
+        )
+        if not welcome_sent:
+            current_app.logger.warning('Welcome email was not sent: %s', welcome_error)
+
         flash(f'Welcome {user_to_create.username}', category='success')
         return redirect(url_for('market_page'))
 
@@ -82,6 +95,30 @@ def login_page():
         flash('Invalid username or password', category='danger')
 
     return render_template('login.html', form=form)
+
+
+@app.route('/test-email', methods=['GET', 'POST'])
+@login_required
+def test_email():
+    form = TestEmailForm(
+        to=current_user.email_address,
+        subject='Flask Email Test',
+        message='If you received this, your email system is working!'
+    )
+
+    if form.validate_on_submit():
+        sent, error_message = send_email(
+            to=form.to.data,
+            subject=form.subject.data,
+            message=form.message.data
+        )
+        if sent:
+            flash(f'Test email sent to {form.to.data}. Check the inbox and spam folder.', category='success')
+        else:
+            flash(error_message, category='danger')
+        return redirect(url_for('test_email'))
+
+    return render_template('test_email.html', form=form)
 
 
 @app.route('/logout')
@@ -273,7 +310,7 @@ def send_reset_email(user):
     token = user.get_reset_token()
     reset_url = url_for('reset_token', token=token, _external=True)
     subject = 'Reset Your Password'
-    body = f"""
+    message = f"""
 Hello {user.username},
 
 A password reset has been requested for your account. Click the link below to set a new password:
@@ -286,74 +323,10 @@ Best regards,
 The Market Team
 """
 
-    mail_server = current_app.config.get('MAIL_SERVER')
-    mail_port = current_app.config.get('MAIL_PORT', 587)
-    mail_username = current_app.config.get('MAIL_USERNAME')
-    mail_password = current_app.config.get('MAIL_PASSWORD')
-    sender = current_app.config.get('MAIL_DEFAULT_SENDER') or mail_username
-    recipient = user.email_address
-    use_tls = current_app.config.get('MAIL_USE_TLS', True)
-    use_ssl = current_app.config.get('MAIL_USE_SSL', False)
-
-    if mail_password:
-        mail_password = ''.join(str(mail_password).split())
-
-    missing_config = []
-    if not mail_server:
-        missing_config.append('MAIL_SERVER')
-    if not sender:
-        missing_config.append('MAIL_DEFAULT_SENDER or MAIL_USERNAME')
-    if not mail_username:
-        missing_config.append('MAIL_USERNAME')
-    if not mail_password:
-        missing_config.append('MAIL_PASSWORD')
-    if missing_config:
-        current_app.logger.warning('Reset email configuration is missing: %s', ', '.join(missing_config))
-        return False, f"Email configuration is missing: {', '.join(missing_config)}."
-
-    message = MIMEMultipart()
-    message['From'] = formataddr(('Market Password Reset', sender))
-    message['To'] = recipient
-    message['Subject'] = subject
-    message.attach(MIMEText(body, 'plain'))
-
-    try:
-        current_app.logger.info(
-            'Sending password reset email with %s:%s TLS=%s SSL=%s from=%s to=%s',
-            mail_server,
-            mail_port,
-            use_tls,
-            use_ssl,
-            sender,
-            recipient
-        )
-        if use_ssl:
-            server = smtplib.SMTP_SSL(mail_server, mail_port, timeout=15)
-        else:
-            server = smtplib.SMTP(mail_server, mail_port, timeout=15)
-
-        with server as smtp:
-            smtp.ehlo()
-            if not use_ssl and use_tls:
-                smtp.starttls()
-                smtp.ehlo()
-            smtp.login(mail_username, mail_password)
-            smtp.sendmail(sender, [recipient], message.as_string())
-
+    sent, error_message = send_email(user.email_address, subject, message)
+    if sent:
         flash('A password reset email has been sent. Check your inbox.', 'success')
-        return True, None
-    except smtplib.SMTPAuthenticationError as error:
-        current_app.logger.error('SMTP auth failed: %s', error)
-        return False, 'Email login failed. For Gmail, use your full Gmail address and a 16-character App Password.'
-    except smtplib.SMTPRecipientsRefused as error:
-        current_app.logger.error('SMTP recipients refused: %s', error)
-        return False, 'Your mail server rejected the recipient address. Check MAIL_USERNAME and MAIL_DEFAULT_SENDER.'
-    except (socket.gaierror, TimeoutError, smtplib.SMTPConnectError) as error:
-        current_app.logger.error('SMTP connection failed: %s', error)
-        return False, 'Could not connect to the email server. Check MAIL_SERVER, MAIL_PORT, TLS/SSL settings, and internet access.'
-    except Exception as error:
-        current_app.logger.error('Reset email failed: %s', error)
-        return False, 'Email delivery failed. Verify SMTP settings, enable App Passwords for Gmail, and try again.'
+    return sent, error_message
 
 
 @app.route('/reset-password', methods=['GET', 'POST'])
@@ -572,3 +545,5 @@ def manage_order(order_id, action):
 
     db.session.commit()
     return redirect(url_for('admin_dashboard'))
+
+

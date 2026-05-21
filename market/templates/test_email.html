@@ -1,0 +1,61 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-7 col-lg-6">
+        <div class="card shadow-lg mt-4">
+            <div class="card-body p-4">
+                <h2 class="card-title mb-4">Send Test Email</h2>
+
+                <form method="POST">
+                    {{ form.hidden_tag() }}
+
+                    <div class="mb-3">
+                        {{ form.to.label(class="form-label") }}
+                        {% if form.to.errors %}
+                            {{ form.to(class="form-control is-invalid") }}
+                            <div class="invalid-feedback">
+                                {% for error in form.to.errors %}
+                                    <span>{{ error }}</span>
+                                {% endfor %}
+                            </div>
+                        {% else %}
+                            {{ form.to(class="form-control", placeholder="recipient@example.com") }}
+                        {% endif %}
+                    </div>
+
+                    <div class="mb-3">
+                        {{ form.subject.label(class="form-label") }}
+                        {% if form.subject.errors %}
+                            {{ form.subject(class="form-control is-invalid") }}
+                            <div class="invalid-feedback">
+                                {% for error in form.subject.errors %}
+                                    <span>{{ error }}</span>
+                                {% endfor %}
+                            </div>
+                        {% else %}
+                            {{ form.subject(class="form-control") }}
+                        {% endif %}
+                    </div>
+
+                    <div class="mb-4">
+                        {{ form.message.label(class="form-label") }}
+                        {% if form.message.errors %}
+                            {{ form.message(class="form-control is-invalid", rows="6") }}
+                            <div class="invalid-feedback">
+                                {% for error in form.message.errors %}
+                                    <span>{{ error }}</span>
+                                {% endfor %}
+                            </div>
+                        {% else %}
+                            {{ form.message(class="form-control", rows="6") }}
+                        {% endif %}
+                    </div>
+
+                    {{ form.submit(class="btn btn-primary w-100") }}
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

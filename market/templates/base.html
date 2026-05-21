@@ -89,6 +89,9 @@
                 <li class="nav-item">
                     <a class="nav-link px-3" href="{{ url_for('transaction_history') }}">Transactions</a>
                 </li>
+                <li class="nav-item">
+                    <a class="nav-link px-3" href="{{ url_for('test_email') }}">Test Email</a>
+                </li>
                 {% if current_user.id == 1 %}
                 <li class="nav-item">
                     <a class="nav-link" href="{{ url_for('admin_dashboard') }}">Admin Dashboard</a>

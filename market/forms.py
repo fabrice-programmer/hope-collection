@@ -1,5 +1,5 @@
 from flask_wtf import FlaskForm
-from wtforms import StringField, PasswordField, SubmitField, IntegerField, RadioField
+from wtforms import StringField, PasswordField, SubmitField, IntegerField, RadioField, TextAreaField
 from wtforms.validators import DataRequired, Email, Length, EqualTo, ValidationError, NumberRange
 from market.models import User
 
@@ -80,6 +80,25 @@ class ResetPasswordForm(FlaskForm):
     )
 
     submit = SubmitField(label='Update Password')
+
+
+class TestEmailForm(FlaskForm):
+    to = StringField(
+        label='Send To',
+        validators=[DataRequired(), Email()]
+    )
+
+    subject = StringField(
+        label='Subject',
+        validators=[DataRequired(), Length(max=120)]
+    )
+
+    message = TextAreaField(
+        label='Message',
+        validators=[DataRequired(), Length(max=1000)]
+    )
+
+    submit = SubmitField(label='Send Test Email')
 
 
 class TopUpForm(FlaskForm):

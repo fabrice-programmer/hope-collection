@@ -58,14 +58,16 @@ Example `.env`:
 ```env
 MAIL_SERVER=smtp.gmail.com
 MAIL_PORT=587
-MAIL_USERNAME=your-email@gmail.com
+MAIL_USERNAME=niyonsabafabrice03@gmail.com
 MAIL_PASSWORD=your-16-character-app-password
 MAIL_USE_TLS=True
 MAIL_USE_SSL=False
-MAIL_DEFAULT_SENDER=your-email@gmail.com
+MAIL_DEFAULT_SENDER=niyonsabafabrice03@gmail.com
 ```
 
 You can copy `.env.example` to `.env` and replace the placeholder values.
+
+The Flask email configuration is placed in `market/__init__.py`. The reusable email sender is `send_email(to, subject, message)` in `market/email_utils.py`.
 
 #### Option A: Using Gmail (Recommended)
 1. Enable "App Passwords" in your Google Account:
