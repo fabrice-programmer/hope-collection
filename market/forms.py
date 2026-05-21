@@ -62,11 +62,6 @@ class RequestResetForm(FlaskForm):
     )
     submit = SubmitField(label='Send Reset Link')
 
-    def validate_email_address(self, email_address_to_check):
-        user = User.query.filter_by(email_address=email_address_to_check.data).first()
-        if user is None:
-            raise ValidationError('No account is registered with that email address.')
-
 
 class ResetPasswordForm(FlaskForm):
     password1 = PasswordField(

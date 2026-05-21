@@ -326,7 +326,7 @@ The Market Team
     sent, error_message = send_email(user.email_address, subject, message)
     if sent:
         flash('A password reset email has been sent. Check your inbox.', 'success')
-    return sent, error_message
+    return sent, error_message, reset_url
 
 
 @app.route('/reset-password', methods=['GET', 'POST'])
@@ -338,9 +338,15 @@ def reset_request():
     if form.validate_on_submit():
         user = User.query.filter_by(email_address=form.email_address.data).first()
         if user:
-            sent, failure_message = send_reset_email(user)
+            sent, failure_message, reset_url = send_reset_email(user)
             if not sent:
-                return render_template('reset_sent.html', email_failed=True, failure_message=failure_message)
+                show_dev_reset_link = current_app.debug or current_app.config.get('SHOW_RESET_LINK_WHEN_EMAIL_FAIL', False)
+                return render_template(
+                    'reset_sent.html',
+                    email_failed=True,
+                    failure_message=failure_message,
+                    reset_url=reset_url if show_dev_reset_link else None
+                )
         flash('If an account exists for that email, a reset link has been sent.', 'info')
         return redirect(url_for('reset_sent'))
 

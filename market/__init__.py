@@ -4,31 +4,15 @@ from flask_sqlalchemy import SQLAlchemy
 from flask_bcrypt import Bcrypt 
 from flask_login import LoginManager
 from flask_session import Session
-
-
-def load_env_file():
-    env_path = os.path.join(os.path.abspath(os.path.dirname(__file__)), '..', '.env')
-    env_path = os.path.normpath(env_path)
-    if not os.path.exists(env_path):
-        return
-
-    with open(env_path, encoding='utf-8') as env_file:
-        for line in env_file:
-            line = line.strip()
-            if not line or line.startswith('#') or '=' not in line:
-                continue
-            key, value = line.split('=', 1)
-            key = key.strip()
-            value = value.strip().strip('"').strip("'")
-            if not os.environ.get(key):
-                os.environ[key] = value
-
-
-load_env_file()
+from flask_mail import Mail
+from dotenv import load_dotenv
 
 app = Flask(__name__)
 
 basedir = os.path.abspath(os.path.dirname(__file__))
+project_root = os.path.abspath(os.path.join(basedir, '..'))
+load_dotenv(os.path.join(project_root, '.env'))
+
 database_path = os.path.join(basedir, '..', 'instance', 'database.db')
 os.makedirs(os.path.dirname(database_path), exist_ok=True)
 database_uri = f"sqlite:///{os.path.normpath(database_path).replace(os.path.sep, '/')}"
@@ -46,9 +30,19 @@ app.config['MAIL_PASSWORD'] = os.environ.get('MAIL_PASSWORD')
 app.config['MAIL_USE_TLS'] = os.environ.get('MAIL_USE_TLS', 'True').lower() in ('true', '1', 'yes')
 app.config['MAIL_USE_SSL'] = os.environ.get('MAIL_USE_SSL', 'False').lower() in ('true', '1', 'yes')
 app.config['MAIL_DEFAULT_SENDER'] = os.environ.get('MAIL_DEFAULT_SENDER') or app.config['MAIL_USERNAME']
+app.config['MAIL_TIMEOUT'] = int(os.environ.get('MAIL_TIMEOUT', 15))
+app.config['SHOW_RESET_LINK_WHEN_EMAIL_FAIL'] = os.environ.get(
+    'SHOW_RESET_LINK_WHEN_EMAIL_FAIL',
+    'False'
+).lower() in ('true', '1', 'yes')
+
+print(f"MAIL_USERNAME loaded: {bool(app.config['MAIL_USERNAME'])}")
+print(f"MAIL_PASSWORD loaded: {bool(app.config['MAIL_PASSWORD'])}")
+print(f"MAIL_PASSWORD length: {len(app.config['MAIL_PASSWORD'] or '')}")
 
 db = SQLAlchemy(app)
 bcrypt = Bcrypt(app)
+mail = Mail(app)
 login_manager = LoginManager(app)
 login_manager.login_view = 'login_page'
 login_manager.login_message = 'Please log in first to access this page.'

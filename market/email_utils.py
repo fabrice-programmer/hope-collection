@@ -1,27 +1,28 @@
-import socket
 import smtplib
-from email.mime.text import MIMEText
-from email.utils import formataddr
+import socket
 
 from flask import current_app
+from flask_mail import Message
+
+from market import mail
 
 
-def send_email(to, subject, message):
+def validate_email_config():
     mail_server = current_app.config.get('MAIL_SERVER')
-    mail_port = current_app.config.get('MAIL_PORT', 587)
     mail_username = current_app.config.get('MAIL_USERNAME')
     mail_password = current_app.config.get('MAIL_PASSWORD')
     sender = current_app.config.get('MAIL_DEFAULT_SENDER') or mail_username
-    use_tls = current_app.config.get('MAIL_USE_TLS', True)
-    use_ssl = current_app.config.get('MAIL_USE_SSL', False)
 
     if mail_password:
         mail_password = ''.join(str(mail_password).split())
     password_is_placeholder = str(mail_password).lower() in {
+        'abcdefghijklmnop',
         'your-16-character-app-password',
+        'replace-with-your-16-character-gmail-app-password',
         'replace-with-your-gmail-app-password',
         'your-app-password'
     }
+    password_has_wrong_length = bool(mail_password) and not password_is_placeholder and len(mail_password) != 16
 
     missing_config = []
     if not mail_server:
@@ -39,37 +40,55 @@ def send_email(to, subject, message):
             f"Email configuration is missing: {', '.join(missing_config)}. "
             "Open the .env file and set MAIL_PASSWORD to your Gmail 16-character App Password."
         )
+    if password_has_wrong_length:
+        current_app.logger.warning('MAIL_PASSWORD has %s characters; Gmail App Passwords must have 16 characters.', len(mail_password))
+        return False, (
+            "MAIL_PASSWORD is not a valid Gmail App Password length. "
+            "Create a Gmail App Password and paste the 16 letters into .env without spaces."
+        )
 
-    email_message = MIMEText(message, 'plain', 'utf-8')
-    email_message['From'] = formataddr(('Market App', sender))
-    email_message['To'] = to
-    email_message['Subject'] = subject
+    current_app.config['MAIL_PASSWORD'] = mail_password
+    return True, None
+
+
+def send_email(to, subject, message, html=None):
+    is_valid, error_message = validate_email_config()
+    if not is_valid:
+        return False, error_message
+
+    sender = current_app.config.get('MAIL_DEFAULT_SENDER') or current_app.config['MAIL_USERNAME']
+    email_message = Message(
+        subject=subject,
+        sender=('Market App', sender),
+        recipients=[to],
+        body=message
+    )
+    if html:
+        email_message.html = html
 
     try:
-        current_app.logger.info('Sending email to %s using %s:%s', to, mail_server, mail_port)
-        if use_ssl:
-            server = smtplib.SMTP_SSL(mail_server, mail_port, timeout=15)
-        else:
-            server = smtplib.SMTP(mail_server, mail_port, timeout=15)
-
-        with server as smtp:
-            smtp.ehlo()
-            if use_tls and not use_ssl:
-                smtp.starttls()
-                smtp.ehlo()
-            smtp.login(mail_username, mail_password)
-            smtp.sendmail(sender, [to], email_message.as_string())
-
+        current_app.logger.info(
+            'Sending email to %s using %s:%s',
+            to,
+            current_app.config.get('MAIL_SERVER'),
+            current_app.config.get('MAIL_PORT')
+        )
+        mail.send(email_message)
         return True, None
-    except smtplib.SMTPAuthenticationError as error:
-        current_app.logger.error('SMTP authentication failed: %s', error)
-        return False, 'Email login failed. For Gmail, use your Gmail address and a 16-character App Password.'
-    except smtplib.SMTPRecipientsRefused as error:
-        current_app.logger.error('SMTP recipient refused: %s', error)
-        return False, 'The email server rejected the recipient address.'
-    except (socket.gaierror, TimeoutError, smtplib.SMTPConnectError) as error:
-        current_app.logger.error('SMTP connection failed: %s', error)
-        return False, 'Could not connect to the email server. Check MAIL_SERVER, MAIL_PORT, and internet access.'
     except Exception as error:
-        current_app.logger.error('Email sending failed: %s', error)
-        return False, 'Email delivery failed. Check your SMTP settings and try again.'
+        if isinstance(error, smtplib.SMTPAuthenticationError):
+            current_app.logger.exception('SMTP authentication failed')
+            return False, (
+                "Email login failed because Gmail rejected the username or App Password. "
+                "Make sure MAIL_USERNAME is niyonsabafabrice03@gmail.com and MAIL_PASSWORD is a real "
+                "16-character Gmail App Password, not your normal Gmail password."
+            )
+        if isinstance(error, smtplib.SMTPRecipientsRefused):
+            current_app.logger.exception('SMTP recipient refused')
+            return False, 'The email server rejected the recipient address.'
+        if isinstance(error, (socket.gaierror, TimeoutError, smtplib.SMTPConnectError)):
+            current_app.logger.exception('SMTP connection failed')
+            return False, 'Could not connect to the email server. Check MAIL_SERVER, MAIL_PORT, and internet access.'
+
+        current_app.logger.exception('Email sending failed')
+        return False, f'Email delivery failed: {error}'
