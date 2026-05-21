@@ -50,7 +50,22 @@ The app stores its SQLite database in `instance/database.db`.
 
 ### 3. Configure Email for Password Reset
 
-The app sends password reset emails using direct SMTP (`smtplib`). You must configure Gmail SMTP credentials using environment variables.
+The app sends password reset emails using direct SMTP (`smtplib`). You must configure SMTP credentials before reset emails can be delivered.
+
+You can either set environment variables in PowerShell or create a `.env` file in the project root. The app loads `.env` automatically when it starts.
+
+Example `.env`:
+```env
+MAIL_SERVER=smtp.gmail.com
+MAIL_PORT=587
+MAIL_USERNAME=your-email@gmail.com
+MAIL_PASSWORD=your-16-character-app-password
+MAIL_USE_TLS=True
+MAIL_USE_SSL=False
+MAIL_DEFAULT_SENDER=your-email@gmail.com
+```
+
+You can copy `.env.example` to `.env` and replace the placeholder values.
 
 #### Option A: Using Gmail (Recommended)
 1. Enable "App Passwords" in your Google Account:

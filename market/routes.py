@@ -1,5 +1,7 @@
 from datetime import datetime, timedelta, timezone
+from email.utils import formataddr
 import json
+import socket
 import smtplib
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
@@ -284,46 +286,71 @@ Best regards,
 The Market Team
 """
 
-    sender = current_app.config['MAIL_DEFAULT_SENDER']
-    recipient = user.email_address
     mail_server = current_app.config.get('MAIL_SERVER')
     mail_port = current_app.config.get('MAIL_PORT', 587)
     mail_username = current_app.config.get('MAIL_USERNAME')
     mail_password = current_app.config.get('MAIL_PASSWORD')
+    sender = current_app.config.get('MAIL_DEFAULT_SENDER') or mail_username
+    recipient = user.email_address
     use_tls = current_app.config.get('MAIL_USE_TLS', True)
+    use_ssl = current_app.config.get('MAIL_USE_SSL', False)
+
+    if mail_password:
+        mail_password = ''.join(str(mail_password).split())
+
+    missing_config = []
+    if not mail_server:
+        missing_config.append('MAIL_SERVER')
+    if not sender:
+        missing_config.append('MAIL_DEFAULT_SENDER or MAIL_USERNAME')
+    if not mail_username:
+        missing_config.append('MAIL_USERNAME')
+    if not mail_password:
+        missing_config.append('MAIL_PASSWORD')
+    if missing_config:
+        current_app.logger.warning('Reset email configuration is missing: %s', ', '.join(missing_config))
+        return False, f"Email configuration is missing: {', '.join(missing_config)}."
 
     message = MIMEMultipart()
-    message['From'] = sender
+    message['From'] = formataddr(('Market Password Reset', sender))
     message['To'] = recipient
     message['Subject'] = subject
     message.attach(MIMEText(body, 'plain'))
 
-    if not mail_username or not mail_password:
-        current_app.logger.warning('Mail username or password is not configured.')
-        return False, 'Email credentials are missing. Set MAIL_USERNAME and MAIL_PASSWORD, then try again.'
-
     try:
-        if current_app.config.get('MAIL_USE_SSL'):
+        current_app.logger.info(
+            'Sending password reset email with %s:%s TLS=%s SSL=%s from=%s to=%s',
+            mail_server,
+            mail_port,
+            use_tls,
+            use_ssl,
+            sender,
+            recipient
+        )
+        if use_ssl:
             server = smtplib.SMTP_SSL(mail_server, mail_port, timeout=15)
         else:
             server = smtplib.SMTP(mail_server, mail_port, timeout=15)
 
         with server as smtp:
             smtp.ehlo()
-            if not current_app.config.get('MAIL_USE_SSL') and use_tls:
+            if not use_ssl and use_tls:
                 smtp.starttls()
                 smtp.ehlo()
             smtp.login(mail_username, mail_password)
-            smtp.sendmail(sender, recipient, message.as_string())
+            smtp.sendmail(sender, [recipient], message.as_string())
 
         flash('A password reset email has been sent. Check your inbox.', 'success')
         return True, None
     except smtplib.SMTPAuthenticationError as error:
         current_app.logger.error('SMTP auth failed: %s', error)
-        return False, 'Email login failed. Use a valid email and App Password (Gmail) and retry.'
+        return False, 'Email login failed. For Gmail, use your full Gmail address and a 16-character App Password.'
     except smtplib.SMTPRecipientsRefused as error:
         current_app.logger.error('SMTP recipients refused: %s', error)
         return False, 'Your mail server rejected the recipient address. Check MAIL_USERNAME and MAIL_DEFAULT_SENDER.'
+    except (socket.gaierror, TimeoutError, smtplib.SMTPConnectError) as error:
+        current_app.logger.error('SMTP connection failed: %s', error)
+        return False, 'Could not connect to the email server. Check MAIL_SERVER, MAIL_PORT, TLS/SSL settings, and internet access.'
     except Exception as error:
         current_app.logger.error('Reset email failed: %s', error)
         return False, 'Email delivery failed. Verify SMTP settings, enable App Passwords for Gmail, and try again.'
