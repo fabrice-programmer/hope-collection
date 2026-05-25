@@ -30,7 +30,8 @@ def is_site_owner():
 # -------------------------
 @app.route('/')
 def home_page():
-    return render_template('home.html')
+    featured_items = Item.query.limit(6).all()
+    return render_template('home.html', featured_items=featured_items)
 
 
 @app.route('/market')
