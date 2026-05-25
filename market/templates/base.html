@@ -8,10 +8,66 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/storefront.css') }}">
+    <style>
+        :root {
+            --nav-bg: #ffffff;
+            --nav-text: #1a1a1a;
+            --brand-accent: #0284c7;
+            --nav-hover: #0ea5e9;
+        }
+        .navbar-custom {
+            background: var(--nav-bg);
+            border-bottom: 1px solid #eeeeee;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+            padding: 0.8rem 1rem;
+        }
+        .navbar-brand {
+            font-weight: 800;
+            letter-spacing: 0.5px;
+            color: var(--nav-text) !important;
+            font-family: 'Playfair Display', serif;
+            font-size: 1.5rem;
+        }
+        .brand-mark {
+            background: var(--brand-accent);
+            color: white;
+            padding: 4px 8px;
+            border-radius: 6px;
+            margin-right: 8px;
+            font-size: 0.9rem;
+        }
+        .nav-link {
+            color: var(--nav-text) !important; /* Deep black icons and text */
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+        .nav-link:hover {
+            color: var(--nav-hover) !important;
+            transform: translateY(-1px);
+        }
+        .nav-greeting {
+            color: var(--nav-text) !important;
+            font-size: 0.9rem;
+            background: #f8f9fa;
+            border-radius: 20px;
+            padding: 5px 15px !important;
+        }
+        .search-bar-nav {
+            background: #f1f3f5;
+            border: 1px solid #dee2e6;
+            color: #212529 !important;
+            border-radius: 20px;
+        }
+        .search-bar-nav::placeholder { color: #adb5bd; }
+        .badge-custom {
+            background-color: var(--brand-accent) !important;
+            color: #fff !important;
+        }
+    </style>
 </head>
 
 <body>
-<nav class="navbar navbar-expand-lg navbar-light navbar-custom sticky-top">
+<nav class="navbar navbar-expand-lg navbar-light sticky-top navbar-custom">
     <div class="container-fluid">
         <a class="navbar-brand" href="{{ url_for('home_page') }}">
             <span class="brand-mark">HC</span>
@@ -23,22 +79,34 @@
         </button>
 
         <div class="collapse navbar-collapse" id="navbarNav">
-            <ul class="navbar-nav me-auto nav-pills">
+            <ul class="navbar-nav me-auto">
                 <li class="nav-item">
                     <a class="nav-link px-3" href="{{ url_for('home_page') }}">Home</a>
+                </li>
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle px-3" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown">
+                        Categories
+                    </a>
+                    <ul class="dropdown-menu shadow border-0">
+                        <li><a class="dropdown-item" href="{{ url_for('market_page') }}">Jewelry</a></li>
+                        <li><a class="dropdown-item" href="{{ url_for('market_page') }}">Hairbands</a></li>
+                        <li><a class="dropdown-item" href="{{ url_for('market_page') }}">Electronics</a></li>
+                        <li><hr class="dropdown-divider"></li>
+                        <li><a class="dropdown-item" href="{{ url_for('market_page') }}">All Products</a></li>
+                    </ul>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link px-3" href="#">Contact</a>
                 </li>
                 {% if current_user.is_authenticated %}
                 <li class="nav-item">
                     <a class="nav-link px-3" href="{{ url_for('market_page') }}">Shop</a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link px-3" href="{{ url_for('transaction_history') }}">Transactions</a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link px-3" href="{{ url_for('test_email') }}">Test Email</a>
+                    <a class="nav-link px-3" href="{{ url_for('transaction_history') }}">My Orders</a>
                 </li>
                 {% if current_user.id == 1 %}
-                <li class="nav-item">
+                <li class="nav-item dropdown">
                     <a class="nav-link" href="{{ url_for('admin_dashboard') }}">Admin Dashboard</a>
                 </li>
                 <li class="nav-item">
@@ -48,11 +116,17 @@
                 {% endif %}
             </ul>
 
+            <form class="d-flex me-lg-3 my-2 my-lg-0">
+                <div class="input-group">
+                    <input class="form-control search-bar-nav" type="search" placeholder="Search jewelry..." aria-label="Search">
+                </div>
+            </form>
+
             <ul class="navbar-nav align-items-lg-center">
                 {% if current_user.is_authenticated %}
                     <li class="nav-item">
                         <a class="nav-link px-3" href="{{ url_for('view_cart') }}">
-                            <i class="bi bi-bag"></i> Cart
+                            <i class="bi bi-cart3"></i>
                             {% set cart = session.get('cart', []) %}
                             {% if cart %}
                             <span class="badge badge-custom ms-1">{{ cart|length }}</span>
@@ -66,11 +140,11 @@
                         <a class="nav-link btn btn-sm btn-outline-dark ms-lg-2" href="{{ url_for('logout_page') }}">Logout</a>
                     </li>
                 {% else %}
-                    <li class="nav-item">
-                        <a class="nav-link btn btn-sm btn-outline-dark ms-lg-2" href="{{ url_for('login_page') }}">Login</a>
+                    <li class="nav-item pe-2">
+                        <a class="nav-link" href="{{ url_for('login_page') }}">Login</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link btn btn-sm btn-dark ms-lg-2 text-white" href="{{ url_for('register_page') }}">Register</a>
+                        <a class="btn btn-dark btn-sm px-4 rounded-pill" href="{{ url_for('register_page') }}">Join Now</a>
                     </li>
                 {% endif %}
             </ul>

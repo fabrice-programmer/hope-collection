@@ -3,70 +3,177 @@
 {% block title %}Hope Collection | Premium Shopping in Rwanda{% endblock %}
 
 {% block content %}
+<!-- Google Fonts for a professional look -->
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&family=Playfair+Display:wght@700&display=swap" rel="stylesheet">
+
+<style>
+    :root {
+        --brand-gold: #D4AF37;
+        --whatsapp-green: #25D366;
+        --soft-bg: #ffffff;
+    }
+    body { font-family: 'Inter', sans-serif; background-color: var(--soft-bg); }
+
+    .hero-section {
+        background: linear-gradient(135deg, #e0f2fe 0%, #ffffff 100%);
+        border-bottom: 1px solid #bae6fd;
+        color: #0c4a6e;
+        padding: 120px 0;
+        margin-bottom: 3rem;
+    .hero-lead {
+        font-size: 1.25rem;
+        max-width: 600px;
+        margin-bottom: 2rem;
+        color: #4a4a4a;
+    }
+    .hero-actions .btn { padding: 12px 30px; font-weight: 600; border-radius: 8px; }
+    .trust-row { margin-top: 2.5rem; display: flex; flex-wrap: wrap; gap: 2rem; font-size: 0.95rem; }
+    .trust-row i { color: #25D366; font-size: 1.2rem; }
+    .product-card {
+        transition: transform 0.3s ease;
+        border: none;
+        border-radius: 1.5rem;
+        overflow: hidden;
+        background: #fff;
+    }
+    .product-card:hover { transform: translateY(-10px); }
+    .product-media img {
+        height: 280px;
+        object-fit: cover;
+    }
+    /* Jewelry Section Styles */
+    .jewelry-section {
+        background-color: #ffffff;
+        padding: 100px 0;
+    }
+    .jewelry-header {
+        max-width: 700px;
+        margin: 0 auto 60px;
+        text-align: center;
+    }
+    .jewelry-header h2 {
+        font-family: 'Playfair Display', serif;
+        font-size: 2.5rem;
+        letter-spacing: 2px;
+        color: #2c2c2c;
+    }
+    .jewelry-card {
+        background: transparent !important;
+        border: none !important;
+        text-align: center;
+    }
+    .jewelry-card .jewelry-price {
+        color: var(--brand-gold);
+        font-weight: 600;
+        font-size: 1.1rem;
+    }
+    /* Horizontal Scroll Container */
+    .scroll-container {
+        display: flex;
+        overflow-x: auto;
+        gap: 2rem;
+        padding: 20px 0 40px;
+        scrollbar-width: none; /* Firefox */
+    }
+    .scroll-container::-webkit-scrollbar { display: none; } /* Chrome/Safari */
+    
+    .scroll-item {
+        min-width: 300px;
+    }
+    .rating-stars {
+        color: #ffc107;
+        font-size: 0.85rem;
+        margin-bottom: 8px;
+    }
+    .btn-whatsapp {
+        background-color: var(--whatsapp-green);
+        color: white;
+        border: none;
+        transition: opacity 0.3s;
+    }
+    .btn-whatsapp:hover {
+        background-color: #1ebe57;
+        color: white;
+        opacity: 0.9;
+    }
+</style>
+
 <section class="hero-section">
     <div class="container">
-        <div class="row align-items-center g-5">
-            <div class="col-lg-6 hero-copy animate-rise">
-                <p class="section-kicker">Kigali style, delivered with care</p>
-                <h1>Hope Collection</h1>
-                <p class="hero-lead">
-                    Shop curated electronics, lifestyle essentials, and everyday favorites with fast local ordering across Rwanda.
-                </p>
-                <div class="hero-actions">
-                    {% if current_user.is_authenticated %}
-                        <a href="{{ url_for('market_page') }}" class="btn btn-dark btn-lg">
-                            <i class="bi bi-bag-check"></i> Shop Collection
-                        </a>
-                    {% else %}
-                        <a href="{{ url_for('register_page') }}" class="btn btn-dark btn-lg">
-                            <i class="bi bi-person-plus"></i> Start Shopping
-                        </a>
-                        <a href="{{ url_for('login_page') }}" class="btn btn-outline-dark btn-lg">Login</a>
-                    {% endif %}
-                </div>
-                <div class="trust-row">
-                    <span><i class="bi bi-whatsapp"></i> WhatsApp orders</span>
-                    <span><i class="bi bi-shield-check"></i> Secure checkout</span>
-                    <span><i class="bi bi-geo-alt"></i> Rwanda delivery</span>
+        <div class="text-center">
+            <p class="text-uppercase tracking-widest fw-bold text-info mb-3" style="letter-spacing: 5px;">Exclusive Rwandan Boutique</p>
+            <h1 class="display-3 fw-bold mb-4" style="font-family: 'Playfair Display', serif; color: #0369a1;">Elegance & Style</h1>
+            <p class="hero-lead mx-auto text-dark opacity-75">Your premier destination for luxury jewelry, handcrafted hair bands, and the latest beauty essentials.</p>
+            <div class="hero-actions mt-4">
+                <a href="{{ url_for('market_page') }}" class="btn btn-primary btn-lg px-5 shadow-lg">Shop The Collection</a>
+                <a href="#jewelry" class="btn btn-outline-info btn-lg px-5 ms-3">View Lookbook</a>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Boutique Experience Section -->
+<section class="py-5 bg-white">
+    <div class="container">
+        <div class="row g-4 text-center">
+            <div class="col-md-4">
+                <div class="p-4">
+                    <i class="bi bi-gem fs-1 text-primary mb-3"></i>
+                    <h4 class="fw-bold">Premium Quality</h4>
+                    <p class="text-muted">Hand-selected jewelry and hair bands made with high-quality materials for lasting elegance.</p>
                 </div>
             </div>
-            <div class="col-lg-6 animate-rise delay-1">
-                <div class="hero-showcase">
-                    {% set hero_item = featured_items[0] if featured_items else none %}
-                    <div class="showcase-main product-media">
-                        {% if hero_item %}
-                            <img data-product-img src="{{ url_for('static', filename='images/products/product-1.jpg') }}" alt="{{ hero_item.name }}">
-                            <div class="fallback-product-icon"><i class="bi bi-bag-heart"></i></div>
-                            <div class="showcase-info">
-                                <span>Featured pick</span>
-                                <strong>{{ hero_item.name }}</strong>
-                                <em>RWF {{ "{:,}".format(hero_item.price) }}</em>
-                            </div>
-                        {% else %}
-                            <div class="fallback-product-icon"><i class="bi bi-bag-heart"></i></div>
-                            <div class="showcase-info">
-                                <span>New arrivals</span>
-                                <strong>Curated products</strong>
-                                <em>Available soon</em>
-                            </div>
-                        {% endif %}
+            <div class="col-md-4">
+                <div class="p-4">
+                    <i class="bi bi-stars fs-1 text-primary mb-3"></i>
+                    <h4 class="fw-bold">Modern Style</h4>
+                    <p class="text-muted">Stay ahead of the fashion curve with our weekly updated collection of modern accessories.</p>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="p-4">
+                    <i class="bi bi-truck fs-1 text-primary mb-3"></i>
+                    <h4 class="fw-bold">Fast Delivery</h4>
+                    <p class="text-muted">Quick and reliable delivery across Rwanda so you can enjoy your new look sooner.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<section class="jewelry-section" id="jewelry">
+    <div class="container">
+        <div class="jewelry-header">
+            <p class="text-uppercase text-muted small fw-bold ls-3 mb-2">Signature Pieces</p>
+            <h2 class="mb-3">Girls' Hair Bands & Accessories</h2>
+            <div class="mx-auto bg-dark" style="width: 50px; height: 1px;"></div>
+            <p class="text-muted mt-3">Scroll to discover our beautiful jewelry, hairbands, and accessories.</p>
+        </div>
+        
+        <div class="scroll-container">
+            {% for item in jewelry_items %}
+            <div class="scroll-item">
+                <div class="card jewelry-card">
+                    <div class="product-media rounded-0 mb-4 shadow-sm">
+                        <img data-product-img src="{{ url_for('static', filename='images/products/product-' ~ item.id ~ '.jpg') }}" 
+                             alt="{{ item.name }}">
                     </div>
-                    <div class="hero-mini-card">
-                        <i class="bi bi-stars"></i>
-                        <div>
-                            <strong>Trending now</strong>
-                            <span>Fresh drops for modern shoppers</span>
-                        </div>
-                    </div>
-                    <div class="hero-mini-card alt">
-                        <i class="bi bi-phone"></i>
-                        <div>
-                            <strong>Easy ordering</strong>
-                            <span>Buy online or order on WhatsApp</span>
-                        </div>
+                    <div class="rating-stars">⭐⭐⭐⭐☆</div>
+                    <h5 class="fw-bold mb-1">{{ item.name }}</h5>
+                    <p class="jewelry-price mb-3">RWF {{ "{:,}".format(item.price) }}</p>
+                    <div class="d-flex justify-content-center gap-2">
+                        <a href="{{ url_for('add_to_cart', item_id=item.id) }}" class="btn btn-outline-dark btn-sm px-4">
+                            Add to Cart
+                        </a>
+                        <a target="_blank" rel="noopener"
+                           href="https://wa.me/250791641207?text={{ ('Hello Hope Collection, I am interested in the ' ~ item.name)|urlencode }}" 
+                           class="btn btn-whatsapp btn-sm px-4">
+                            <i class="bi bi-whatsapp"></i> Order on WhatsApp
+                        </a>
                     </div>
                 </div>
             </div>
+            {% endfor %}
         </div>
     </div>
 </section>
@@ -76,7 +183,7 @@
         <div class="section-heading">
             <div>
                 <p class="section-kicker">Featured products</p>
-                <h2>Trending at Hope Collection</h2>
+                <h2 class="fw-bold">New Arrivals in Rwanda</h2>
             </div>
             {% if current_user.is_authenticated %}
                 <a href="{{ url_for('market_page') }}" class="btn btn-outline-dark">
@@ -95,7 +202,11 @@
                     <div class="col-sm-6 col-lg-4 animate-rise" style="animation-delay: {{ loop.index0 * 0.08 }}s;">
                         <article class="product-card h-100">
                             <div class="product-media">
-                                <img data-product-img src="{{ url_for('static', filename='images/products/product-' ~ loop.index ~ '.jpg') }}" alt="{{ item.name }}">
+                                {% set img_keyword = item.name.split(' ')[-1] | lower %}
+                                <img data-product-img 
+                                     src="{{ url_for('static', filename='images/products/product-' ~ item.id ~ '.jpg') }}" 
+                                     onerror="this.src='https://images.unsplash.com/photo-1573408301185-9146fe634ad0?auto=format&fit=crop&q=80&w=600'"
+                                     alt="{{ item.name }}">
                                 <div class="fallback-product-icon"><i class="bi bi-box-seam"></i></div>
                                 <span class="product-badge">Trending</span>
                             </div>
@@ -119,7 +230,7 @@
                                         </a>
                                     {% endif %}
                                     <a class="btn btn-success" target="_blank" rel="noopener"
-                                       href="https://wa.me/?text={{ ('Hello Hope Collection, I want to order ' ~ item.name ~ ' for RWF ' ~ item.price)|urlencode }}">
+                                       href="https://wa.me/250791641207?text={{ ('Hello Hope Collection, I want to order ' ~ item.name ~ ' for RWF ' ~ item.price)|urlencode }}">
                                         <i class="bi bi-whatsapp"></i> Order
                                     </a>
                                 </div>

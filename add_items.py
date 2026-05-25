@@ -15,8 +15,17 @@ with app.app_context():
     item8 = Item(name="Kids Tablet", barcode="888888888888", price=250, description="Durable tablet with parental controls and educational apps")
     item9 = Item(name="Wireless Headphones", barcode="999999999999", price=180, description="Noise cancelling headphones with bluetooth and long battery life")
     item10 = Item(name="Mechanical Keyboard", barcode="000000000000", price=130, description="RGB mechanical keyboard with customizable keys")
+    item11 = Item(name="Mini Fan", barcode="123456789012", price=15000, description="Stay cool anywhere with this portable high-speed mini fan. Reach us at 0791641207 or 0722451953.")
+    item12 = Item(name="Jewelry Set", barcode="234567890123", price=8000, description="A stunning jewelry set designed to add elegance to any outfit.")
+    item13 = Item(name="Ring Collection", barcode="345678901234", price=6000, description="Modern and classic rings in various sizes and styles.")
+    item14 = Item(name="Stainless Bracelet", barcode="456789012345", price=5000, description="Minimalist stainless steel bracelet that never fades.")
+    item15 = Item(name="Silk Hairband", barcode="567890123456", price=3000, description="Soft silk hairbands in multiple colors, perfect for any hairstyle.")
+    item16 = Item(name="Gold Plated Necklace", barcode="678901234567", price=12000, description="Elegant gold-plated necklace with a minimalist pendant.")
+    item17 = Item(name="Pearl Headband", barcode="789012345678", price=4500, description="Luxury pearl-encrusted headband for special occasions.")
+    item18 = Item(name="Portable Handheld Fan", barcode="890123456789", price=10000, description="Powerful yet quiet handheld fan with 3 speed settings.")
 
-    db.session.add_all([item1, item2, item3, item4, item5, item6, item7, item8, item9, item10])
+    db.session.add_all([item1, item2, item3, item4, item5, item6, item7, item8, item9, item10, 
+                        item11, item12, item13, item14, item15, item16, item17, item18])
     db.session.commit()
 
     print("✓ Items added successfully!")

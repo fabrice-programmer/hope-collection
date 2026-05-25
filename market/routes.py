@@ -30,8 +30,18 @@ def is_site_owner():
 # -------------------------
 @app.route('/')
 def home_page():
-    featured_items = Item.query.limit(6).all()
-    return render_template('home.html', featured_items=featured_items)
+    featured_items = Item.query.order_by(Item.id.desc()).limit(8).all()
+    jewelry_items = Item.query.filter(
+        (Item.name.contains('Jewelry')) | 
+        (Item.name.contains('Ring')) | 
+        (Item.name.contains('Bracelet')) |
+        (Item.name.contains('Hairband')) |
+        (Item.name.contains('Headband')) |
+        (Item.name.contains('Fan'))
+    ).all()
+    return render_template('home.html', 
+                         featured_items=featured_items, 
+                         jewelry_items=jewelry_items)
 
 
 @app.route('/market')
@@ -552,5 +562,3 @@ def manage_order(order_id, action):
 
     db.session.commit()
     return redirect(url_for('admin_dashboard'))
-
-
