@@ -173,3 +173,22 @@ class ItemForm(FlaskForm):
         validators=[FileAllowed(['mp4', 'mov', 'avi'])]
     )
     submit = SubmitField(label='Save Product')
+
+class SettingsForm(FlaskForm):
+    whatsapp_number = StringField(
+        label='WhatsApp Number (e.g., 250791641207):',
+        validators=[DataRequired(), Length(min=10, max=15)]
+    )
+    contact_email = StringField(
+        label='Contact Email Address:',
+        validators=[DataRequired(), Email()]
+    )
+    business_phone = StringField(
+        label='Secondary Business Phone:',
+        validators=[Length(max=20)]
+    )
+    business_address = TextAreaField(
+        label='Business Address:',
+        validators=[Length(max=255)]
+    )
+    submit = SubmitField(label='Update Settings')

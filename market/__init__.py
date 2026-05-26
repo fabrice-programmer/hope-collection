@@ -50,5 +50,15 @@ login_manager.login_message_category = 'info'
 
 Session(app)
 
+@app.context_processor
+def inject_site_settings():
+    from market.models import SiteSettings
+    settings = SiteSettings.query.first()
+    if not settings:
+        settings = SiteSettings(id=1)
+        db.session.add(settings)
+        db.session.commit()
+    return dict(site_settings=settings)
+
 # Register routes when the package is imported so app routes are available
 from market import routes

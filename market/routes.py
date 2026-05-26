@@ -51,6 +51,30 @@ def save_video(form_video):
     form_video.save(video_path)
     return video_fn
 
+def send_invoice_email(user, order):
+    try:
+        items_data = json.loads(order.items)
+        items_summary = "\n".join([
+            f"- {item['name']} (x{item['quantity']}): RWF {item['price'] * item['quantity']:,}" 
+            for item in items_data
+        ])
+        
+        subject = f"Invoice for Your Order #{order.id}"
+        message = f"Hello {user.username},\n\n" \
+                  f"Your payment for Order #{order.id} has been received and approved.\n\n" \
+                  f"Order Details:\n{items_summary}\n" \
+                  f"Total Amount Paid: RWF {order.total_price:,}\n\n" \
+                  f"Thank you for your purchase!\nBest regards,\nThe Market Team"
+        
+        sent, error = send_email(user.email_address, subject, message)
+        if not sent:
+            current_app.logger.warning(f"Invoice email failed for Order {order.id}: {error}")
+        return sent, error
+    except Exception as e:
+        error_msg = str(e)
+        current_app.logger.error(f"Error preparing invoice for Order {order.id}: {error_msg}")
+        return False, error_msg
+
 # -------------------------
 # ADMIN PRODUCT MANAGEMENT
 # -------------------------
@@ -633,27 +657,11 @@ def manage_top_up_request(order_id, action):
         # Send Invoice Email to Customer (Consistency with manage_order)
         user = db.session.get(User, order.user_id)
         if user:
-            try:
-                items_data = json.loads(order.items)
-                items_summary = "\n".join([
-                    f"- {item['name']} (x{item['quantity']}): ${item['price'] * item['quantity']}" 
-                    for item in items_data
-                ])
-                
-                subject = f"Invoice for Your Order #{order.id}"
-                message = f"Hello {user.username},\n\n" \
-                          f"Your payment for Order #{order.id} has been received and approved.\n\n" \
-                          f"Order Details:\n{items_summary}\n" \
-                          f"Total Amount Paid: ${order.total_price}\n\n" \
-                          f"Thank you for your purchase!\nBest regards,\nThe Market Team"
-                
-                sent, error = send_email(user.email_address, subject, message)
-                if not sent:
-                    current_app.logger.warning(f"Invoice email failed for Order {order.id}: {error}")
-            except Exception as e:
-                current_app.logger.error(f"Error preparing invoice for Order {order.id}: {e}")
-
-        flash(f'Order #{order.id} approved.', category='success')
+            sent, error = send_invoice_email(user, order)
+            if sent:
+                flash(f'Order #{order.id} approved and invoice sent to {user.email_address}.', category='success')
+            else:
+                flash(f'Order approved, but invoice email failed: {error}', category='warning')
 
     elif action == 'decline':
         order.status = 'cancelled'
@@ -695,27 +703,11 @@ def manage_order(order_id, action):
         # Send Invoice Email to Customer
         user = db.session.get(User, order.user_id)
         if user:
-            try:
-                items_data = json.loads(order.items)
-                items_summary = "\n".join([
-                    f"- {item['name']} (x{item['quantity']}): ${item['price'] * item['quantity']}" 
-                    for item in items_data
-                ])
-                
-                subject = f"Invoice for Your Order #{order.id}"
-                message = f"Hello {user.username},\n\n" \
-                          f"Your payment for Order #{order.id} has been received and approved.\n\n" \
-                          f"Order Details:\n{items_summary}\n" \
-                          f"Total Amount Paid: ${order.total_price}\n\n" \
-                          f"Thank you for your purchase!\nBest regards,\nThe Market Team"
-                
-                sent, error = send_email(user.email_address, subject, message)
-                if not sent:
-                    current_app.logger.warning(f"Invoice email failed for Order {order.id}: {error}")
-            except Exception as e:
-                current_app.logger.error(f"Error preparing invoice for Order {order.id}: {e}")
-
-        flash(f'Order #{order.id} approved.', category='success')
+            sent, error = send_invoice_email(user, order)
+            if sent:
+                flash(f'Order #{order.id} approved and invoice sent to {user.email_address}.', category='success')
+            else:
+                flash(f'Order approved, but invoice email failed: {error}', category='warning')
     elif action == 'decline' and order.status == 'pending':
         order.status = 'cancelled'
         order.approved_at = datetime.now(timezone.utc)
@@ -737,3 +729,28 @@ def manage_order(order_id, action):
 
     db.session.commit()
     return redirect(url_for('admin_dashboard'))
+
+@app.route('/admin/settings', methods=['GET', 'POST'])
+@login_required
+def admin_settings():
+    if not is_site_owner():
+        flash('Admin access only', category='danger')
+        return redirect(url_for('market_page'))
+
+    settings = SiteSettings.query.first()
+    if not settings:
+        settings = SiteSettings(id=1)
+        db.session.add(settings)
+        db.session.commit()
+
+    form = SettingsForm(obj=settings)
+    if form.validate_on_submit():
+        settings.whatsapp_number = form.whatsapp_number.data
+        settings.contact_email = form.contact_email.data
+        settings.business_phone = form.business_phone.data
+        settings.business_address = form.business_address.data
+        db.session.commit()
+        flash('Site settings have been updated!', category='success')
+        return redirect(url_for('admin_dashboard'))
+
+    return render_template('admin_settings.html', form=form, title="Business Settings")

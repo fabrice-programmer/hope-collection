@@ -154,3 +154,15 @@ class Transaction(db.Model):
 
     def __repr__(self):
         return f'<Transaction {self.id}>'
+
+# -------------------------
+# SITE SETTINGS
+# -------------------------
+class SiteSettings(db.Model):
+    __tablename__ = 'site_settings'
+
+    id               = db.Column(db.Integer, primary_key=True)
+    whatsapp_number  = db.Column(db.String(20), nullable=False, default='250791641207')
+    contact_email    = db.Column(db.String(120), nullable=False, default='niyonsabafabrice03@gmail.com')
+    business_phone   = db.Column(db.String(20))
+    business_address = db.Column(db.String(255))

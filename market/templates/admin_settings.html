@@ -1,0 +1,49 @@
+{% extends 'base.html' %}
+{% block title %}
+    {{ title }}
+{% endblock %}
+{% block content %}
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card shadow border-0">
+                <div class="card-header bg-dark text-white p-3">
+                    <h3 class="mb-0"><i class="fas fa-cogs me-2"></i>{{ title }}</h3>
+                </div>
+                <div class="card-body p-4">
+                    <p class="text-muted mb-4">Update your business contact details. These values are used for WhatsApp links and contact sections across the website.</p>
+                    <form method="POST">
+                        {{ form.hidden_tag() }}
+                        
+                        <div class="mb-3">
+                            {{ form.whatsapp_number.label(class="form-label fw-bold") }}
+                            {{ form.whatsapp_number(class="form-control", placeholder="e.g. 250791641207") }}
+                            <small class="text-muted">Include country code without '+'. This is used for WhatsApp Order buttons.</small>
+                        </div>
+                        
+                        <div class="mb-3">
+                            {{ form.contact_email.label(class="form-label fw-bold") }}
+                            {{ form.contact_email(class="form-control", placeholder="business@email.com") }}
+                        </div>
+
+                        <div class="mb-3">
+                            {{ form.business_phone.label(class="form-label fw-bold") }}
+                            {{ form.business_phone(class="form-control") }}
+                        </div>
+
+                        <div class="mb-3">
+                            {{ form.business_address.label(class="form-label fw-bold") }}
+                            {{ form.business_address(class="form-control", rows="3") }}
+                        </div>
+
+                        <div class="d-grid gap-2 mt-4">
+                            {{ form.submit(class="btn btn-primary btn-lg") }}
+                            <a href="{{ url_for('admin_dashboard') }}" class="btn btn-outline-secondary">Cancel</a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

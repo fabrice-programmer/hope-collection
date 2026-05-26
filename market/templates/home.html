@@ -174,7 +174,7 @@
                             Add to Cart
                         </a>
                         <a target="_blank" rel="noopener"
-                           href="https://wa.me/250791641207?text={{ ('Hello Hope Collection, I am interested in the ' ~ item.name)|urlencode }}" 
+                           href="https://wa.me/{{ site_settings.whatsapp_number }}?text={{ ('Hello Hope Collection, I am interested in the ' ~ item.name)|urlencode }}" 
                            class="btn btn-whatsapp btn-sm px-4">
                             <i class="bi bi-whatsapp"></i> Order on WhatsApp
                         </a>
@@ -238,7 +238,7 @@
                                         </a>
                                     {% endif %}
                                     <a class="btn btn-success" target="_blank" rel="noopener"
-                                       href="https://wa.me/250791641207?text={{ ('Hello Hope Collection, I want to order ' ~ item.name ~ ' for RWF ' ~ item.price)|urlencode }}">
+                                       href="https://wa.me/{{ site_settings.whatsapp_number }}?text={{ ('Hello Hope Collection, I want to order ' ~ item.name ~ ' for RWF ' ~ item.price)|urlencode }}">
                                         <i class="bi bi-whatsapp"></i> Order
                                     </a>
                                 </div>
@@ -254,6 +254,45 @@
                 <p>Add products from your admin area and they will appear here automatically.</p>
             </div>
         {% endif %}
+    </div>
+</section>
+
+<!-- Professional Contact Section -->
+<section class="py-5 bg-light border-top" id="contact">
+    <div class="container">
+        <div class="row align-items-center">
+            <div class="col-lg-6">
+                <h2 class="display-5 fw-bold mb-4" style="font-family: 'Playfair Display', serif;">Get In Touch</h2>
+                <p class="lead text-muted mb-5">Have questions about our collection or need a custom order? Our team in Rwanda is here to help you shine.</p>
+                <div class="d-flex flex-column gap-4">
+                    <div class="d-flex align-items-center gap-3">
+                        <div class="bg-primary text-white rounded-circle d-flex align-items-center justify-content-center" style="width: 50px; height: 50px;">
+                            <i class="bi bi-envelope"></i>
+                        </div>
+                        <div>
+                            <p class="mb-0 text-muted small">Email Us</p>
+                            <h5 class="mb-0">{{ site_settings.contact_email }}</h5>
+                        </div>
+                    </div>
+                    <div class="d-flex align-items-center gap-3">
+                        <div class="bg-success text-white rounded-circle d-flex align-items-center justify-content-center" style="width: 50px; height: 50px;">
+                            <i class="bi bi-whatsapp"></i>
+                        </div>
+                        <div>
+                            <p class="mb-0 text-muted small">WhatsApp Support</p>
+                            <h5 class="mb-0">+{{ site_settings.whatsapp_number }}</h5>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-5 offset-lg-1 mt-5 mt-lg-0">
+                <div class="p-5 bg-white shadow-lg rounded-4 text-center">
+                    <h3 class="fw-bold mb-4">Start Shopping</h3>
+                    <p class="text-muted mb-4">Explore our exclusive items and enjoy fast delivery across the country.</p>
+                    <a href="{{ url_for('market_page') }}" class="btn btn-dark btn-lg w-100">Browse Market</a>
+                </div>
+            </div>
+        </div>
     </div>
 </section>
 {% endblock %}
