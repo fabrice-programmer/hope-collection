@@ -27,6 +27,7 @@
             <nav class="space-y-2">
                 <a href="{{ url_for('admin_dashboard') }}" class="block rounded-3xl px-4 py-3 bg-indigo-600 text-white shadow-soft">Dashboard</a>
                     <a href="{{ url_for('top_up_requests') }}" class="block rounded-3xl px-4 py-3 text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800">Payment Requests</a>
+                <a href="{{ url_for('admin_dashboard') }}#products-section" class="block rounded-3xl px-4 py-3 text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800">Manage Products</a>
                 <a href="{{ url_for('market_page') }}" class="block rounded-3xl px-4 py-3 text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800">Market</a>
                 <a href="{{ url_for('logout_page') }}" class="block rounded-3xl px-4 py-3 text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800">Logout</a>
             </nav>
@@ -107,6 +108,53 @@
                         <canvas id="productsChart" height="240"></canvas>
                     </div>
                 </section>
+
+            <section id="products-section" class="rounded-3xl bg-white dark:bg-slate-900 p-6 shadow-soft border border-slate-200 dark:border-slate-800 overflow-x-auto scrollbar-thin">
+                <div class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between mb-6">
+                    <div>
+                        <h3 class="text-xl font-semibold">Product Management</h3>
+                        <p class="text-sm text-slate-500 dark:text-slate-400">Add, edit, or remove products from the store.</p>
+                    </div>
+                    <a href="{{ url_for('add_item') }}" class="rounded-2xl bg-emerald-600 px-6 py-2 text-sm font-semibold text-white hover:bg-emerald-500 shadow-lg transition-all">
+                        + Add New Product
+                    </a>
+                </div>
+                <table class="min-w-full text-left text-sm text-slate-700 dark:text-slate-300">
+                    <thead class="border-b border-slate-200 text-slate-500 dark:border-slate-800 dark:text-slate-400">
+                        <tr>
+                            <th class="py-4 px-4">Preview</th>
+                            <th class="py-4 px-4">Name</th>
+                            <th class="py-4 px-4">Price</th>
+                            <th class="py-4 px-4">Barcode</th>
+                            <th class="py-4 px-4">Media</th>
+                            <th class="py-4 px-4">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-slate-200 dark:divide-slate-800">
+                        {% for item in items %}
+                        <tr>
+                            <td class="py-4 px-4">
+                                <img src="{{ url_for('static', filename='product_pics/' + item.image_file) }}" class="h-12 w-12 rounded-lg object-cover shadow-sm">
+                            </td>
+                            <td class="py-4 px-4 font-medium">{{ item.name }}</td>
+                            <td class="py-4 px-4">RWF {{ "{:,}".format(item.price) }}</td>
+                            <td class="py-4 px-4 font-mono text-xs">{{ item.barcode }}</td>
+                            <td class="py-4 px-4 text-xs">
+                                {% if item.video_file %}<span class="text-indigo-500 font-bold">Video ✓</span>{% else %}No Video{% endif %}
+                            </td>
+                            <td class="py-4 px-4">
+                                <div class="flex gap-2">
+                                    <a href="{{ url_for('edit_item', item_id=item.id) }}" class="text-indigo-600 hover:text-indigo-400 font-semibold">Edit</a>
+                                    <form action="{{ url_for('delete_item', item_id=item.id) }}" method="POST" onsubmit="return confirm('Delete this product permanently?')">
+                                        <button type="submit" class="text-rose-600 hover:text-rose-400 font-semibold">Delete</button>
+                                    </form>
+                                </div>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </section>
 
                 <section class="rounded-3xl bg-white dark:bg-slate-900 p-6 shadow-soft border border-slate-200 dark:border-slate-800 overflow-x-auto scrollbar-thin">
                     <div class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between mb-6">

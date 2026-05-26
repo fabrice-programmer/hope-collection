@@ -1,0 +1,59 @@
+{% extends 'base.html' %}
+{% block title %}
+    {{ title }}
+{% endblock %}
+{% block content %}
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card shadow border-0">
+                <div class="card-header bg-dark text-white p-3">
+                    <h3 class="mb-0"><i class="fas fa-box-open me-2"></i>{{ title }}</h3>
+                </div>
+                <div class="card-body p-4">
+                    <form method="POST" enctype="multipart/form-data">
+                        {{ form.hidden_tag() }}
+                        
+                        <div class="mb-3">
+                            {{ form.name.label(class="form-label fw-bold") }}
+                            {{ form.name(class="form-control", placeholder="Enter product name") }}
+                        </div>
+                        
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                {{ form.price.label(class="form-label fw-bold") }}
+                                {{ form.price(class="form-control", placeholder="Price in RWF") }}
+                            </div>
+                            <div class="col-md-6">
+                                {{ form.barcode.label(class="form-label fw-bold") }}
+                                {{ form.barcode(class="form-control", placeholder="12-digit barcode") }}
+                            </div>
+                        </div>
+                        
+                        <div class="mb-3">
+                            {{ form.description.label(class="form-label fw-bold") }}
+                            {{ form.description(class="form-control", rows="3", placeholder="Describe the item...") }}
+                        </div>
+
+                        <div class="mb-3">
+                            {{ form.picture.label(class="form-label fw-bold") }}
+                            {{ form.picture(class="form-control") }}
+                        </div>
+
+                        <div class="mb-3">
+                            {{ form.video.label(class="form-label fw-bold") }}
+                            {{ form.video(class="form-control") }}
+                            <small class="text-muted">Supported formats: MP4, MOV, AVI</small>
+                        </div>
+
+                        <div class="d-grid gap-2 mt-4">
+                            {{ form.submit(class="btn btn-success btn-lg") }}
+                            <a href="{{ url_for('admin_dashboard') }}" class="btn btn-outline-secondary">Back to Dashboard</a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

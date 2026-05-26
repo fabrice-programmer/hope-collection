@@ -155,8 +155,16 @@
             <div class="scroll-item">
                 <div class="card jewelry-card">
                     <div class="product-media rounded-0 mb-4 shadow-sm">
-                        <img data-product-img src="{{ url_for('static', filename='images/products/product-' ~ item.id ~ '.jpg') }}" 
-                             alt="{{ item.name }}">
+                        {% if item.video_file %}
+                            <video class="w-100" style="height: 280px; object-fit: cover;" autoplay muted loop>
+                                <source src="{{ url_for('static', filename='product_videos/' ~ item.video_file) }}" type="video/mp4">
+                            </video>
+                        {% else %}
+                            <img data-product-img 
+                                 src="{{ url_for('static', filename='product_pics/' ~ item.image_file) }}" 
+                                 onerror="this.src='{{ url_for('static', filename='images/products/product-' ~ item.id ~ '.jpg') }}'"
+                                 alt="{{ item.name }}">
+                        {% endif %}
                     </div>
                     <div class="rating-stars">⭐⭐⭐⭐☆</div>
                     <h5 class="fw-bold mb-1">{{ item.name }}</h5>
@@ -204,7 +212,7 @@
                             <div class="product-media">
                                 {% set img_keyword = item.name.split(' ')[-1] | lower %}
                                 <img data-product-img 
-                                     src="{{ url_for('static', filename='images/products/product-' ~ item.id ~ '.jpg') }}" 
+                                     src="{{ url_for('static', filename='product_pics/' ~ item.image_file) }}" 
                                      onerror="this.src='https://images.unsplash.com/photo-1573408301185-9146fe634ad0?auto=format&fit=crop&q=80&w=600'"
                                      alt="{{ item.name }}">
                                 <div class="fallback-product-icon"><i class="bi bi-box-seam"></i></div>

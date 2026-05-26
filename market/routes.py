@@ -1,4 +1,6 @@
 from datetime import datetime, timedelta, timezone
+import os
+import secrets
 import json
 
 from market import app, db
@@ -14,7 +16,8 @@ from market.forms import (
     CheckoutForm,
     RequestResetForm,
     ResetPasswordForm,
-    TestEmailForm
+    TestEmailForm,
+    ItemForm
 )
 
 
@@ -23,6 +26,129 @@ from market.forms import (
 # -------------------------
 def is_site_owner():
     return current_user.is_authenticated and current_user.id == 1
+
+def save_picture(form_picture):
+    random_hex = secrets.token_hex(8)
+    _, f_ext = os.path.splitext(form_picture.filename)
+    picture_fn = random_hex + f_ext
+    picture_path = os.path.join(app.root_path, 'static/product_pics', picture_fn)
+    
+    # Ensure directory exists
+    os.makedirs(os.path.dirname(picture_path), exist_ok=True)
+    
+    form_picture.save(picture_path)
+    return picture_fn
+
+def save_video(form_video):
+    random_hex = secrets.token_hex(8)
+    _, f_ext = os.path.splitext(form_video.filename)
+    video_fn = random_hex + f_ext
+    video_path = os.path.join(app.root_path, 'static/product_videos', video_fn)
+    
+    # Ensure directory exists
+    os.makedirs(os.path.dirname(video_path), exist_ok=True)
+    
+    form_video.save(video_path)
+    return video_fn
+
+# -------------------------
+# ADMIN PRODUCT MANAGEMENT
+# -------------------------
+@app.route('/admin/items/new', methods=['GET', 'POST'])
+@login_required
+def add_item():
+    if not is_site_owner():
+        flash('Admin access only', category='danger')
+        return redirect(url_for('market_page'))
+    
+    form = ItemForm()
+    if form.validate_on_submit():
+        # Manual check for barcode uniqueness for new items
+        existing = Item.query.filter_by(barcode=form.barcode.data).first()
+        if existing:
+            flash('Barcode already exists! Please use a unique barcode.', category='danger')
+            return render_template('admin_item_form.html', form=form, title="Add New Product")
+
+        picture_file = 'default.jpg'
+        if form.picture.data:
+            picture_file = save_picture(form.picture.data)
+            
+        video_file = None
+        if form.video.data:
+            video_file = save_video(form.video.data)
+
+        item_to_create = Item(
+            name=form.name.data,
+            price=form.price.data,
+            barcode=form.barcode.data,
+            description=form.description.data,
+            image_file=picture_file,
+            video_file=video_file
+        )
+        db.session.add(item_to_create)
+        db.session.commit()
+        flash(f'Product "{item_to_create.name}" added successfully!', category='success')
+        return redirect(url_for('admin_dashboard'))
+    
+    return render_template('admin_item_form.html', form=form, title="Add New Product")
+
+
+@app.route('/admin/items/edit/<int:item_id>', methods=['GET', 'POST'])
+@login_required
+def edit_item(item_id):
+    if not is_site_owner():
+        flash('Admin access only', category='danger')
+        return redirect(url_for('market_page'))
+    
+    item = db.session.get(Item, item_id)
+    if not item:
+        flash('Item not found', category='danger')
+        return redirect(url_for('admin_dashboard'))
+
+    form = ItemForm(obj=item) # Pre-fill form with existing data
+    
+    if form.validate_on_submit():
+        # Manual check for barcode uniqueness if it changed
+        if form.barcode.data != item.barcode:
+            existing = Item.query.filter_by(barcode=form.barcode.data).first()
+            if existing:
+                flash('Barcode already exists on another product.', category='danger')
+                return render_template('admin_item_form.html', form=form, title="Edit Product")
+
+        if form.picture.data:
+            picture_file = save_picture(form.picture.data)
+            item.image_file = picture_file
+
+        if form.video.data:
+            video_file = save_video(form.video.data)
+            item.video_file = video_file
+
+        item.name = form.name.data
+        item.price = form.price.data
+        item.barcode = form.barcode.data
+        item.description = form.description.data
+        
+        db.session.commit()
+        flash(f'Product "{item.name}" updated successfully!', category='success')
+        return redirect(url_for('admin_dashboard'))
+    
+    return render_template('admin_item_form.html', form=form, title="Edit Product")
+
+
+@app.route('/admin/items/delete/<int:item_id>', methods=['POST'])
+@login_required
+def delete_item(item_id):
+    if not is_site_owner():
+        flash('Admin access only', category='danger')
+        return redirect(url_for('market_page'))
+    
+    item = db.session.get(Item, item_id)
+    if item:
+        db.session.delete(item)
+        db.session.commit()
+        flash('Product deleted successfully.', category='info')
+    
+    return redirect(url_for('admin_dashboard'))
 
 
 # -------------------------
@@ -503,7 +629,32 @@ def manage_top_up_request(order_id, action):
         ).order_by(Transaction.id.desc()).first()
         if transaction:
             transaction.status = 'approved'
-        flash(f'Payment request for Order #{order.id} approved.', category='success')
+
+        # Send Invoice Email to Customer (Consistency with manage_order)
+        user = db.session.get(User, order.user_id)
+        if user:
+            try:
+                items_data = json.loads(order.items)
+                items_summary = "\n".join([
+                    f"- {item['name']} (x{item['quantity']}): ${item['price'] * item['quantity']}" 
+                    for item in items_data
+                ])
+                
+                subject = f"Invoice for Your Order #{order.id}"
+                message = f"Hello {user.username},\n\n" \
+                          f"Your payment for Order #{order.id} has been received and approved.\n\n" \
+                          f"Order Details:\n{items_summary}\n" \
+                          f"Total Amount Paid: ${order.total_price}\n\n" \
+                          f"Thank you for your purchase!\nBest regards,\nThe Market Team"
+                
+                sent, error = send_email(user.email_address, subject, message)
+                if not sent:
+                    current_app.logger.warning(f"Invoice email failed for Order {order.id}: {error}")
+            except Exception as e:
+                current_app.logger.error(f"Error preparing invoice for Order {order.id}: {e}")
+
+        flash(f'Order #{order.id} approved.', category='success')
+
     elif action == 'decline':
         order.status = 'cancelled'
         order.approved_at = datetime.now(timezone.utc)

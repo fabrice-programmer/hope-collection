@@ -20,7 +20,15 @@
                     <div class="col-md-6">
                         <article class="product-card h-100">
                             <div class="product-media">
-                                <img data-product-img src="{{ url_for('static', filename='images/products/product-' ~ loop.index ~ '.jpg') }}" alt="{{ item.name }}">
+                                {% if item.video_file %}
+                                    <video class="w-100" style="height: 280px; object-fit: cover;" controls>
+                                        <source src="{{ url_for('static', filename='product_videos/' ~ item.video_file) }}" type="video/mp4">
+                                    </video>
+                                {% else %}
+                                    <img data-product-img 
+                                         src="{{ url_for('static', filename='product_pics/' ~ item.image_file) }}" 
+                                         alt="{{ item.name }}">
+                                {% endif %}
                                 <div class="fallback-product-icon"><i class="bi bi-box-seam"></i></div>
                                 <span class="product-badge">Available</span>
                             </div>

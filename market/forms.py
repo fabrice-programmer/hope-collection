@@ -1,4 +1,5 @@
 from flask_wtf import FlaskForm
+from flask_wtf.file import FileField, FileAllowed
 from wtforms import StringField, PasswordField, SubmitField, IntegerField, RadioField, TextAreaField
 from wtforms.validators import DataRequired, Email, Length, EqualTo, ValidationError, NumberRange
 from market.models import User
@@ -146,5 +147,29 @@ class CheckoutForm(FlaskForm):
 
     submit = SubmitField(label='Complete Checkout')
 
-
-
+class ItemForm(FlaskForm):
+    name = StringField(
+        label='Product Name:',
+        validators=[DataRequired(), Length(min=2, max=30)]
+    )
+    price = IntegerField(
+        label='Price:',
+        validators=[DataRequired(), NumberRange(min=1)]
+    )
+    barcode = StringField(
+        label='Barcode (12 chars):',
+        validators=[DataRequired(), Length(min=12, max=12)]
+    )
+    description = TextAreaField(
+        label='Description:',
+        validators=[DataRequired(), Length(max=1024)]
+    )
+    picture = FileField(
+        label='Product Picture:',
+        validators=[FileAllowed(['jpg', 'png', 'jpeg'])]
+    )
+    video = FileField(
+        label='Product Video:',
+        validators=[FileAllowed(['mp4', 'mov', 'avi'])]
+    )
+    submit = SubmitField(label='Save Product')
