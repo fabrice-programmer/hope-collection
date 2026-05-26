@@ -22,30 +22,38 @@ def validate_email_config():
         'replace-with-your-gmail-app-password',
         'your-app-password'
     }
-    password_has_wrong_length = bool(mail_password) and not password_is_placeholder and len(mail_password) != 16
 
     missing_config = []
     if not mail_server:
+        current_app.logger.warning("MAIL_SERVER is not set.")
         missing_config.append('MAIL_SERVER')
     if not mail_username:
+        current_app.logger.warning("MAIL_USERNAME is not set.")
         missing_config.append('MAIL_USERNAME')
-    if not mail_password or password_is_placeholder:
+    if not mail_password:
+        current_app.logger.warning("MAIL_PASSWORD is not set in the environment configuration.")
         missing_config.append('MAIL_PASSWORD')
     if not sender:
+        current_app.logger.warning("Email sender (MAIL_DEFAULT_SENDER) is not set.")
         missing_config.append('MAIL_DEFAULT_SENDER or MAIL_USERNAME')
 
     if missing_config:
         current_app.logger.warning('Email configuration is missing: %s', ', '.join(missing_config))
+        is_gmail = mail_server and 'gmail' in str(mail_server).lower()
+        msg = f"Email configuration is missing: {', '.join(missing_config)}."
+        if is_gmail:
+            msg += " Please set a 16-character App Password in your .env file."
         return False, (
-            f"Email configuration is missing: {', '.join(missing_config)}. "
-            "Open the .env file and set MAIL_PASSWORD to your Gmail 16-character App Password."
+            f"{msg} Check the '.env' file in your project root folder."
         )
-    if password_has_wrong_length:
-        current_app.logger.warning('MAIL_PASSWORD has %s characters; Gmail App Passwords must have 16 characters.', len(mail_password))
-        return False, (
-            "MAIL_PASSWORD is not a valid Gmail App Password length. "
-            "Create a Gmail App Password and paste the 16 letters into .env without spaces."
-        )
+
+    if password_is_placeholder:
+        return False, "MAIL_PASSWORD in your .env file is still a placeholder. Please replace it with your real password."
+
+    # Gmail specific length check
+    is_gmail = mail_server and 'gmail' in str(mail_server).lower()
+    if is_gmail and len(mail_password) != 16:
+        return False, f"Gmail App Passwords must be exactly 16 characters. Your current password is {len(mail_password)} characters."
 
     current_app.config['MAIL_PASSWORD'] = mail_password
     return True, None
@@ -78,10 +86,10 @@ def send_email(to, subject, message, html=None):
     except Exception as error:
         if isinstance(error, smtplib.SMTPAuthenticationError):
             current_app.logger.exception('SMTP authentication failed')
+            username = current_app.config.get('MAIL_USERNAME')
             return False, (
-                "Email login failed because Gmail rejected the username or App Password. "
-                "Make sure MAIL_USERNAME is niyonsabafabrice03@gmail.com and MAIL_PASSWORD is a real "
-                "16-character Gmail App Password, not your normal Gmail password."
+                f"Email login failed. The server rejected the credentials for {username}. "
+                "If you are using Gmail, make sure you use a 16-character App Password (not your normal password)."
             )
         if isinstance(error, smtplib.SMTPRecipientsRefused):
             current_app.logger.exception('SMTP recipient refused')

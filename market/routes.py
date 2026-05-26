@@ -540,6 +540,30 @@ def manage_order(order_id, action):
         ).order_by(Transaction.id.desc()).first()
         if transaction:
             transaction.status = 'approved'
+
+        # Send Invoice Email to Customer
+        user = db.session.get(User, order.user_id)
+        if user:
+            try:
+                items_data = json.loads(order.items)
+                items_summary = "\n".join([
+                    f"- {item['name']} (x{item['quantity']}): ${item['price'] * item['quantity']}" 
+                    for item in items_data
+                ])
+                
+                subject = f"Invoice for Your Order #{order.id}"
+                message = f"Hello {user.username},\n\n" \
+                          f"Your payment for Order #{order.id} has been received and approved.\n\n" \
+                          f"Order Details:\n{items_summary}\n" \
+                          f"Total Amount Paid: ${order.total_price}\n\n" \
+                          f"Thank you for your purchase!\nBest regards,\nThe Market Team"
+                
+                sent, error = send_email(user.email_address, subject, message)
+                if not sent:
+                    current_app.logger.warning(f"Invoice email failed for Order {order.id}: {error}")
+            except Exception as e:
+                current_app.logger.error(f"Error preparing invoice for Order {order.id}: {e}")
+
         flash(f'Order #{order.id} approved.', category='success')
     elif action == 'decline' and order.status == 'pending':
         order.status = 'cancelled'

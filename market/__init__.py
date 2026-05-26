@@ -11,7 +11,8 @@ app = Flask(__name__)
 
 basedir = os.path.abspath(os.path.dirname(__file__))
 project_root = os.path.abspath(os.path.join(basedir, '..'))
-load_dotenv(os.path.join(project_root, '.env'))
+env_path = os.path.join(project_root, '.env')
+load_dotenv(env_path)
 
 database_path = os.path.join(basedir, '..', 'instance', 'database.db')
 os.makedirs(os.path.dirname(database_path), exist_ok=True)
@@ -23,10 +24,10 @@ app.config['SESSION_PERMANENT'] = False
 app.config['SESSION_TYPE'] = 'filesystem'
 
 # Email configuration
-app.config['MAIL_SERVER'] = os.environ.get('MAIL_SERVER', 'smtp.gmail.com')
-app.config['MAIL_PORT'] = int(os.environ.get('MAIL_PORT', 587))
-app.config['MAIL_USERNAME'] = os.environ.get('MAIL_USERNAME')
-app.config['MAIL_PASSWORD'] = os.environ.get('MAIL_PASSWORD')
+app.config['MAIL_SERVER'] = (os.environ.get('MAIL_SERVER') or 'smtp.gmail.com').strip()
+app.config['MAIL_PORT'] = int(os.environ.get('MAIL_PORT') or 587)
+app.config['MAIL_USERNAME'] = (os.environ.get('MAIL_USERNAME') or '').strip()
+app.config['MAIL_PASSWORD'] = (os.environ.get('MAIL_PASSWORD') or '').strip()
 app.config['MAIL_USE_TLS'] = os.environ.get('MAIL_USE_TLS', 'True').lower() in ('true', '1', 'yes')
 app.config['MAIL_USE_SSL'] = os.environ.get('MAIL_USE_SSL', 'False').lower() in ('true', '1', 'yes')
 app.config['MAIL_DEFAULT_SENDER'] = os.environ.get('MAIL_DEFAULT_SENDER') or app.config['MAIL_USERNAME']
@@ -36,9 +37,8 @@ app.config['SHOW_RESET_LINK_WHEN_EMAIL_FAIL'] = os.environ.get(
     'False'
 ).lower() in ('true', '1', 'yes')
 
-print(f"MAIL_USERNAME loaded: {bool(app.config['MAIL_USERNAME'])}")
-print(f"MAIL_PASSWORD loaded: {bool(app.config['MAIL_PASSWORD'])}")
-print(f"MAIL_PASSWORD length: {len(app.config['MAIL_PASSWORD'] or '')}")
+print(f" * Loading .env from: {env_path} (Exists: {os.path.exists(env_path)})")
+print(f" * Email Config: User={app.config['MAIL_USERNAME']}, Pwd Loaded={bool(app.config['MAIL_PASSWORD'])}")
 
 db = SQLAlchemy(app)
 bcrypt = Bcrypt(app)
@@ -52,4 +52,3 @@ Session(app)
 
 # Register routes when the package is imported so app routes are available
 from market import routes
-
