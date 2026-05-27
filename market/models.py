@@ -162,7 +162,12 @@ class SiteSettings(db.Model):
     __tablename__ = 'site_settings'
 
     id               = db.Column(db.Integer, primary_key=True)
+    business_name    = db.Column(db.String(100), nullable=False, default='Hope Collection')
     whatsapp_number  = db.Column(db.String(20), nullable=False, default='250791641207')
     contact_email    = db.Column(db.String(120), nullable=False, default='niyonsabafabrice03@gmail.com')
     business_phone   = db.Column(db.String(20))
     business_address = db.Column(db.String(255))
+    facebook_url     = db.Column(db.String(255))
+    instagram_url    = db.Column(db.String(255))
+    currency_code    = db.Column(db.String(10), default='RWF')
+    delivery_fee     = db.Column(db.Integer, default=0)

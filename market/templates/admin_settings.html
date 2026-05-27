@@ -8,37 +8,85 @@
         <div class="col-md-8">
             <div class="card shadow border-0">
                 <div class="card-header bg-dark text-white p-3">
-                    <h3 class="mb-0"><i class="fas fa-cogs me-2"></i>{{ title }}</h3>
+                    <h3 class="mb-0"><i class="bi bi-sliders2-vertical me-2"></i>{{ title }}</h3>
                 </div>
                 <div class="card-body p-4">
-                    <p class="text-muted mb-4">Update your business contact details. These values are used for WhatsApp links and contact sections across the website.</p>
+                    <p class="text-muted mb-4">Configure your brand identity and store defaults. These details are used globally across your boutique storefront.</p>
+                    
                     <form method="POST">
                         {{ form.hidden_tag() }}
                         
-                        <div class="mb-3">
-                            {{ form.whatsapp_number.label(class="form-label fw-bold") }}
-                            {{ form.whatsapp_number(class="form-control", placeholder="e.g. 250791641207") }}
-                            <small class="text-muted">Include country code without '+'. This is used for WhatsApp Order buttons.</small>
-                        </div>
-                        
-                        <div class="mb-3">
-                            {{ form.contact_email.label(class="form-label fw-bold") }}
-                            {{ form.contact_email(class="form-control", placeholder="business@email.com") }}
+                        <!-- Section: Brand Identity -->
+                        <h5 class="text-primary border-bottom pb-2 mb-3"><i class="bi bi-shop me-2"></i>Brand Identity</h5>
+                        <div class="mb-4">
+                            {{ form.business_name.label(class="form-label fw-bold") }}
+                            {{ form.business_name(class="form-control form-control-lg", placeholder="e.g. Hope Collection") }}
                         </div>
 
-                        <div class="mb-3">
-                            {{ form.business_phone.label(class="form-label fw-bold") }}
-                            {{ form.business_phone(class="form-control") }}
+                        <!-- Section: Contact Channels -->
+                        <h5 class="text-primary border-bottom pb-2 mb-3"><i class="bi bi-chat-left-dots me-2"></i>Contact Channels</h5>
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                {{ form.whatsapp_number.label(class="form-label fw-bold text-success") }}
+                                {{ form.whatsapp_number(class="form-control", placeholder="e.g. 250791641207") }}
+                                <small class="text-muted">Used for 'Order on WhatsApp' buttons.</small>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                {{ form.contact_email.label(class="form-label fw-bold") }}
+                                {{ form.contact_email(class="form-control", placeholder="business@email.com") }}
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                {{ form.business_phone.label(class="form-label fw-bold") }}
+                                {{ form.business_phone(class="form-control") }}
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                {{ form.business_address.label(class="form-label fw-bold") }}
+                                {{ form.business_address(class="form-control", rows="1") }}
+                            </div>
                         </div>
 
-                        <div class="mb-3">
-                            {{ form.business_address.label(class="form-label fw-bold") }}
-                            {{ form.business_address(class="form-control", rows="3") }}
+                        <!-- Section: Social Media -->
+                        <h5 class="text-primary border-bottom pb-2 mb-3"><i class="bi bi-share me-2"></i>Social Presence</h5>
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label fw-bold"><i class="bi bi-instagram me-1"></i> Instagram URL</label>
+                                {{ form.instagram_url(class="form-control", placeholder="https://instagram.com/yourbrand") }}
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label fw-bold"><i class="bi bi-facebook me-1"></i> Facebook URL</label>
+                                {{ form.facebook_url(class="form-control", placeholder="https://facebook.com/yourbrand") }}
+                            </div>
                         </div>
 
-                        <div class="d-grid gap-2 mt-4">
-                            {{ form.submit(class="btn btn-primary btn-lg") }}
-                            <a href="{{ url_for('admin_dashboard') }}" class="btn btn-outline-secondary">Cancel</a>
+                        <!-- Section: Shop Configuration -->
+                        <h5 class="text-primary border-bottom pb-2 mb-3"><i class="bi bi-gear-wide-connected me-2"></i>Store Policies</h5>
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                {{ form.currency_code.label(class="form-label fw-bold") }}
+                                {{ form.currency_code(class="form-control", placeholder="e.g. RWF") }}
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                {{ form.delivery_fee.label(class="form-label fw-bold") }}
+                                <div class="input-group">
+                                    <span class="input-group-text">+</span>
+                                    {{ form.delivery_fee(class="form-control", placeholder="0") }}
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="alert alert-info py-2 small mt-2">
+                            <i class="bi bi-info-circle me-2"></i> Note: These changes will take effect immediately across the home page, market, and contact sections.
+                        </div>
+
+                        <div class="row mt-4 g-2">
+                            <div class="col-md-8">
+                                {{ form.submit(class="btn btn-primary btn-lg w-100 shadow-sm") }}
+                            </div>
+                            <div class="col-md-4">
+                                <a href="{{ url_for('admin_dashboard') }}" class="btn btn-outline-secondary btn-lg w-100">Cancel</a>
+                            </div>
                         </div>
                     </form>
                 </div>

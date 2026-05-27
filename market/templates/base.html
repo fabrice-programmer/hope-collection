@@ -70,8 +70,8 @@
 <nav class="navbar navbar-expand-lg navbar-light sticky-top navbar-custom">
     <div class="container-fluid">
         <a class="navbar-brand" href="{{ url_for('home_page') }}">
-            <span class="brand-mark">HC</span>
-            Hope Collection
+            <span class="brand-mark">{{ site_settings.business_name[:2].upper() if site_settings.business_name else 'HC' }}</span>
+            {{ site_settings.business_name or 'Hope Collection' }}
         </a>
 
         <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">

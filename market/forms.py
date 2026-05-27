@@ -175,20 +175,40 @@ class ItemForm(FlaskForm):
     submit = SubmitField(label='Save Product')
 
 class SettingsForm(FlaskForm):
+    business_name = StringField(
+        label='Business Name:',
+        validators=[DataRequired(), Length(max=100)]
+    )
     whatsapp_number = StringField(
-        label='WhatsApp Number (e.g., 250791641207):',
+        label='WhatsApp Number (include country code, no +):',
         validators=[DataRequired(), Length(min=10, max=15)]
     )
     contact_email = StringField(
-        label='Contact Email Address:',
+        label='Public Contact Email:',
         validators=[DataRequired(), Email()]
     )
     business_phone = StringField(
-        label='Secondary Business Phone:',
+        label='Business Phone Line:',
         validators=[Length(max=20)]
     )
     business_address = TextAreaField(
-        label='Business Address:',
+        label='Physical Store Address:',
         validators=[Length(max=255)]
+    )
+    facebook_url = StringField(
+        label='Facebook Page URL:',
+        validators=[Length(max=255)]
+    )
+    instagram_url = StringField(
+        label='Instagram Profile URL:',
+        validators=[Length(max=255)]
+    )
+    currency_code = StringField(
+        label='Store Currency (e.g. RWF):',
+        validators=[DataRequired(), Length(max=10)]
+    )
+    delivery_fee = IntegerField(
+        label='Flat Rate Delivery Fee:',
+        validators=[NumberRange(min=0)]
     )
     submit = SubmitField(label='Update Settings')

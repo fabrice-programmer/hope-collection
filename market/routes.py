@@ -745,10 +745,15 @@ def admin_settings():
 
     form = SettingsForm(obj=settings)
     if form.validate_on_submit():
+        settings.business_name = form.business_name.data
         settings.whatsapp_number = form.whatsapp_number.data
         settings.contact_email = form.contact_email.data
         settings.business_phone = form.business_phone.data
         settings.business_address = form.business_address.data
+        settings.facebook_url = form.facebook_url.data
+        settings.instagram_url = form.instagram_url.data
+        settings.currency_code = form.currency_code.data
+        settings.delivery_fee = form.delivery_fee.data
         db.session.commit()
         flash('Site settings have been updated!', category='success')
         return redirect(url_for('admin_dashboard'))
