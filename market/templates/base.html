@@ -37,6 +37,14 @@
             margin-right: 8px;
             font-size: 0.9rem;
         }
+        .brand-logo {
+            height: 38px;
+            width: 38px;
+            object-fit: contain;
+            border-radius: 6px;
+            margin-right: 8px;
+            background: #fff;
+        }
         .nav-link {
             color: var(--nav-text) !important; /* Deep black icons and text */
             font-weight: 600;
@@ -71,8 +79,9 @@
 <nav class="navbar navbar-expand-lg navbar-light sticky-top navbar-custom">
     <div class="container-fluid">
         <a class="navbar-brand" href="{{ url_for('home_page') }}">
-            {% if site_settings.logo_url %}
-                <img src="{{ site_settings.logo_url }}" alt="Logo" height="30" class="d-inline-block align-text-top me-2">
+            {% if site_settings.logo_url and site_settings.logo_url != '/static/images/logo.png' %}
+                <img src="{{ site_settings.logo_url }}" alt="{{ site_settings.business_name }} logo" class="brand-logo align-text-top" onerror="this.classList.add('d-none'); this.nextElementSibling.classList.remove('d-none');">
+                <span class="brand-mark d-none">{{ site_settings.business_name[:2].upper() if site_settings.business_name else 'HC' }}</span>
             {% else %}
                 <span class="brand-mark">{{ site_settings.business_name[:2].upper() if site_settings.business_name else 'HC' }}</span>
             {% endif %}

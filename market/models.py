@@ -184,7 +184,7 @@ class SiteSettings(db.Model):
     id               = db.Column(db.Integer, primary_key=True)
     business_name    = db.Column(db.String(100), nullable=False, default='Hope Collection')
     tagline          = db.Column(db.String(255), default='Your one-stop boutique for elegance.')
-    logo_url         = db.Column(db.String(255), default='/static/images/logo.png')
+    logo_url         = db.Column(db.String(255), default='')
     meta_description = db.Column(db.String(255), default='Hope Collection - Quality jewelry, electronics, and accessories.')
     whatsapp_number  = db.Column(db.String(20), nullable=False, default='250789174857')
     contact_email    = db.Column(db.String(120), nullable=False, default='niyonsabafabrice03@gmail.com')

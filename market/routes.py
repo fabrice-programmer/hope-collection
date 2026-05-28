@@ -7,6 +7,7 @@ from market import app, db
 from sqlalchemy import select
 from flask import render_template, redirect, url_for, flash, session, current_app
 from flask_login import login_user, logout_user, login_required, current_user
+from werkzeug.utils import secure_filename
 
 from market.email_utils import send_email
 from market.models import Item, User, TopUpRequest, Order, OrderItem, Transaction, SiteSettings
@@ -55,7 +56,8 @@ def save_video(form_video):
 
 def save_logo(form_logo):
     random_hex = secrets.token_hex(8)
-    _, f_ext = os.path.splitext(form_logo.filename)
+    filename = secure_filename(form_logo.filename)
+    _, f_ext = os.path.splitext(filename)
     logo_fn = random_hex + f_ext.lower()
     logo_path = os.path.join(app.root_path, 'static/images/logos', logo_fn)
 
@@ -771,12 +773,15 @@ def admin_settings():
         settings = SiteSettings(id=1)
         db.session.add(settings)
         db.session.commit()
+    elif not settings.about_content:
+        settings.about_content = 'Welcome to Hope Collection. Your premium boutique.'
+        db.session.commit()
 
     form = SettingsForm(obj=settings)
     if form.validate_on_submit():
         settings.business_name = form.business_name.data
         settings.tagline = form.tagline.data
-        if form.logo_file.data:
+        if form.logo_file.data and form.logo_file.data.filename:
             settings.logo_url = save_logo(form.logo_file.data)
         settings.meta_description = form.meta_description.data
         settings.whatsapp_number = form.whatsapp_number.data

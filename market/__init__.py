@@ -147,6 +147,7 @@ def inject_site_settings():
             settings = SiteSettings(
                 id=1,
                 business_name='Hope Collection',
+                logo_url='',
                 whatsapp_number='250791641207',
                 contact_email='niyonsabafabrice03@gmail.com',
                 currency_code='RWF',
@@ -164,8 +165,13 @@ def inject_site_settings():
         # Fallback object prevents template crash
         class DefaultSettings:
             business_name = 'Hope Collection'
+            tagline = 'Your premium boutique.'
+            logo_url = ''
+            meta_description = 'Hope Collection - Quality jewelry, electronics, and accessories.'
             whatsapp_number = '250791641207'
             contact_email = 'niyonsabafabrice03@gmail.com'
+            business_phone = ''
+            business_address = ''
             currency_code = 'RWF'
             delivery_fee = 0
             facebook_url = ''

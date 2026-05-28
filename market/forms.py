@@ -1,7 +1,7 @@
 from flask_wtf import FlaskForm
 from flask_wtf.file import FileField, FileAllowed
 from wtforms import StringField, PasswordField, SubmitField, IntegerField, RadioField, TextAreaField
-from wtforms.validators import DataRequired, Email, Length, EqualTo, ValidationError, NumberRange
+from wtforms.validators import DataRequired, Email, Length, EqualTo, ValidationError, NumberRange, Optional
 from market.models import User
 
 
@@ -185,7 +185,7 @@ class SettingsForm(FlaskForm):
     )
     logo_file = FileField(
         label='Upload Logo:',
-        validators=[FileAllowed(['jpg', 'jpeg', 'png', 'webp', 'gif'], 'Images only, please.')]
+        validators=[FileAllowed(['jpg', 'jpeg', 'png', 'webp', 'gif', 'svg', 'ico'], 'Images only, please.')]
     )
     meta_description = TextAreaField(
         label='SEO Meta Description (for Google search):',
@@ -221,7 +221,7 @@ class SettingsForm(FlaskForm):
     )
     delivery_fee = IntegerField(
         label='Flat Rate Delivery Fee:',
-        validators=[NumberRange(min=0)]
+        validators=[Optional(), NumberRange(min=0)]
     )
     about_content = TextAreaField(
         label='About Us Content:',

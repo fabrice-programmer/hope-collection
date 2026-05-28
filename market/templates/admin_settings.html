@@ -15,6 +15,18 @@
                     
                     <form method="POST" enctype="multipart/form-data">
                         {{ form.hidden_tag() }}
+                        {% if form.errors %}
+                            <div class="alert alert-danger">
+                                Please check the highlighted settings and try again.
+                                <ul class="mb-0 mt-2">
+                                    {% for field_name, errors in form.errors.items() %}
+                                        {% for error in errors %}
+                                            <li>{{ form[field_name].label.text }} {{ error }}</li>
+                                        {% endfor %}
+                                    {% endfor %}
+                                </ul>
+                            </div>
+                        {% endif %}
                         
                         <!-- Section: Brand Identity -->
                         <h5 class="text-primary border-bottom pb-2 mb-3"><i class="bi bi-patch-check me-2"></i>Global Identity</h5>
@@ -29,11 +41,14 @@
                             </div>
                             <div class="col-12">
                                 {{ form.logo_file.label(class="form-label fw-bold") }}
-                                {{ form.logo_file(class="form-control", accept="image/png,image/jpeg,image/webp,image/gif") }}
-                                <small class="text-muted">Upload a PNG, JPG, WEBP, or GIF logo.</small>
-                                {% if settings.logo_url %}
+                                {{ form.logo_file(class="form-control" ~ (" is-invalid" if form.logo_file.errors else ""), accept="image/png,image/jpeg,image/webp,image/gif,image/svg+xml,image/x-icon") }}
+                                {% for error in form.logo_file.errors %}
+                                    <div class="invalid-feedback d-block">{{ error }}</div>
+                                {% endfor %}
+                                <small class="text-muted">Upload a PNG, JPG, WEBP, GIF, SVG, or ICO logo.</small>
+                                {% if settings.logo_url and settings.logo_url != '/static/images/logo.png' %}
                                     <div class="mt-3 d-flex align-items-center gap-3">
-                                        <img src="{{ settings.logo_url }}" alt="Current logo" class="border rounded bg-light p-2" style="height: 64px; max-width: 180px; object-fit: contain;">
+                                        <img src="{{ settings.logo_url }}" alt="Current logo" class="border rounded bg-light p-2" style="height: 64px; max-width: 180px; object-fit: contain;" onerror="this.closest('div').remove();">
                                         <span class="text-muted small">Current logo</span>
                                     </div>
                                 {% endif %}
@@ -99,6 +114,16 @@
                                     {{ form.delivery_fee(class="form-control", placeholder="0") }}
                                 </div>
                             </div>
+                        </div>
+
+                        <!-- Section: About Content -->
+                        <h5 class="text-primary border-bottom pb-2 mb-3"><i class="bi bi-info-circle me-2"></i>About Page</h5>
+                        <div class="mb-4">
+                            {{ form.about_content.label(class="form-label fw-bold") }}
+                            {{ form.about_content(class="form-control" ~ (" is-invalid" if form.about_content.errors else ""), rows="4") }}
+                            {% for error in form.about_content.errors %}
+                                <div class="invalid-feedback d-block">{{ error }}</div>
+                            {% endfor %}
                         </div>
 
                         <div class="alert alert-info py-2 small mt-2">
