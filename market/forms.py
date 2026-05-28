@@ -223,4 +223,8 @@ class SettingsForm(FlaskForm):
         label='Flat Rate Delivery Fee:',
         validators=[NumberRange(min=0)]
     )
+    about_content = TextAreaField(
+        label='About Us Content:',
+        validators=[DataRequired()]
+    )
     submit = SubmitField(label='Update Settings')

@@ -1,0 +1,50 @@
+{% extends 'base.html' %}
+
+{% block title %}About Us - {{ site_settings.business_name }}{% endblock %}
+
+{% block content %}
+<div class="container my-5">
+    <div class="row justify-content-center">
+        <div class="col-md-10 col-lg-9">
+            <div class="card border-0 shadow-lg rounded-4 overflow-hidden">
+                <!-- Header Section -->
+                <div class="card-header bg-dark text-white p-5 text-center">
+                    <h1 class="display-4 fw-bold mb-2">About Our Boutique</h1>
+                    <p class="lead mb-0 text-white-50">{{ site_settings.tagline }}</p>
+                </div>
+
+                <!-- Content Section -->
+                <div class="card-body p-5">
+                    <div class="about-text mb-5" style="white-space: pre-wrap; font-size: 1.1rem; line-height: 1.8; color: #333;">
+                        {{ site_settings.about_content }}
+                    </div>
+
+                    <hr class="my-5">
+
+                    <!-- Professional Info Grid -->
+                    <div class="row text-center g-4">
+                        <div class="col-md-4">
+                            <div class="p-4 border rounded-3 h-100 bg-light">
+                                <h5 class="fw-bold mb-3"><i class="fas fa-envelope text-primary me-2"></i>Email Us</h5>
+                                <p class="text-muted mb-0">{{ site_settings.contact_email }}</p>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="p-4 border rounded-3 h-100 bg-light">
+                                <h5 class="fw-bold mb-3"><i class="fab fa-whatsapp text-success me-2"></i>WhatsApp</h5>
+                                <p class="text-muted mb-0">+{{ site_settings.whatsapp_number }}</p>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="p-4 border rounded-3 h-100 bg-light">
+                                <h5 class="fw-bold mb-3"><i class="fas fa-map-marker-alt text-danger me-2"></i>Location</h5>
+                                <p class="text-muted mb-0">{{ site_settings.business_address if site_settings.business_address else 'Online Store' }}</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

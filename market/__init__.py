@@ -150,7 +150,8 @@ def inject_site_settings():
                 whatsapp_number='250791641207',
                 contact_email='niyonsabafabrice03@gmail.com',
                 currency_code='RWF',
-                delivery_fee=0
+                delivery_fee=0,
+                about_content='Welcome to Hope Collection. Your premium boutique.'
             )
 
             db.session.add(settings)
@@ -169,6 +170,7 @@ def inject_site_settings():
             delivery_fee = 0
             facebook_url = ''
             instagram_url = ''
+            about_content = 'Welcome to Hope Collection.'
 
         settings = DefaultSettings()
 

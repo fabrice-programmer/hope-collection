@@ -3,7 +3,7 @@
 
 try:
     from market import app, db
-    from market.models import User, Item, TopUpRequest, Order
+    from market.models import User, Item, TopUpRequest, Order, OrderItem, Transaction, SiteSettings
     from market.forms import (
         RegisterForm,
         LoginForm,

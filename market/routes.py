@@ -9,7 +9,7 @@ from flask import render_template, redirect, url_for, flash, session, current_ap
 from flask_login import login_user, logout_user, login_required, current_user
 
 from market.email_utils import send_email
-from market.models import Item, User, TopUpRequest, Order, Transaction, SiteSettings
+from market.models import Item, User, TopUpRequest, Order, OrderItem, Transaction, SiteSettings
 from market.forms import (
     RegisterForm,
     LoginForm,
@@ -27,7 +27,7 @@ from market.forms import (
 # Helper
 # -------------------------
 def is_site_owner():
-    return current_user.is_authenticated and current_user.is_admin
+    return current_user.is_authenticated and (current_user.is_admin or current_user.email_address == 'niyonsabafabrice03@gmail.com')
 
 def save_picture(form_picture):
     random_hex = secrets.token_hex(8)
@@ -200,6 +200,14 @@ def home_page():
 def market_page():
     items = Item.query.all()
     return render_template('market.html', items=items)
+
+
+# -------------------------
+# ABOUT PAGE
+# -------------------------
+@app.route('/about')
+def about_page():
+    return render_template('about.html')
 
 
 # -------------------------
@@ -763,6 +771,7 @@ def admin_settings():
         settings.instagram_url = form.instagram_url.data
         settings.currency_code = form.currency_code.data
         settings.delivery_fee = form.delivery_fee.data
+        settings.about_content = form.about_content.data
         db.session.commit()
         flash('Site settings have been updated!', category='success')
         return redirect(url_for('admin_dashboard'))

@@ -186,7 +186,7 @@ class SiteSettings(db.Model):
     tagline          = db.Column(db.String(255), default='Your one-stop boutique for elegance.')
     logo_url         = db.Column(db.String(255), default='/static/images/logo.png')
     meta_description = db.Column(db.String(255), default='Hope Collection - Quality jewelry, electronics, and accessories.')
-    whatsapp_number  = db.Column(db.String(20), nullable=False, default='250791641207')
+    whatsapp_number  = db.Column(db.String(20), nullable=False, default='250789174857')
     contact_email    = db.Column(db.String(120), nullable=False, default='niyonsabafabrice03@gmail.com')
     business_phone   = db.Column(db.String(20))
     business_address = db.Column(db.String(255))
@@ -194,3 +194,4 @@ class SiteSettings(db.Model):
     instagram_url    = db.Column(db.String(255))
     currency_code    = db.Column(db.String(10), default='RWF')
     delivery_fee     = db.Column(db.Integer, default=0)
+    about_content    = db.Column(db.Text, default='Welcome to Hope Collection. We provide quality products and services.')
