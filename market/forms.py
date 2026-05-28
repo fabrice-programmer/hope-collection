@@ -179,6 +179,18 @@ class SettingsForm(FlaskForm):
         label='Business Name:',
         validators=[DataRequired(), Length(max=100)]
     )
+    tagline = StringField(
+        label='Site Tagline / Slogan:',
+        validators=[Length(max=255)]
+    )
+    logo_url = StringField(
+        label='Logo Image URL:',
+        validators=[Length(max=255)]
+    )
+    meta_description = TextAreaField(
+        label='SEO Meta Description (for Google search):',
+        validators=[Length(max=255)]
+    )
     whatsapp_number = StringField(
         label='WhatsApp Number (include country code, no +):',
         validators=[DataRequired(), Length(min=10, max=15)]

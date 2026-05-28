@@ -4,11 +4,12 @@ import secrets
 import json
 
 from market import app, db
+from sqlalchemy import select
 from flask import render_template, redirect, url_for, flash, session, current_app
 from flask_login import login_user, logout_user, login_required, current_user
 
 from market.email_utils import send_email
-from market.models import Item, User, TopUpRequest, Order, Transaction
+from market.models import Item, User, TopUpRequest, Order, Transaction, SiteSettings
 from market.forms import (
     RegisterForm,
     LoginForm,
@@ -17,7 +18,8 @@ from market.forms import (
     RequestResetForm,
     ResetPasswordForm,
     TestEmailForm,
-    ItemForm
+    ItemForm,
+    SettingsForm
 )
 
 
@@ -25,7 +27,7 @@ from market.forms import (
 # Helper
 # -------------------------
 def is_site_owner():
-    return current_user.is_authenticated and current_user.id == 1
+    return current_user.is_authenticated and current_user.is_admin
 
 def save_picture(form_picture):
     random_hex = secrets.token_hex(8)
@@ -53,10 +55,9 @@ def save_video(form_video):
 
 def send_invoice_email(user, order):
     try:
-        items_data = json.loads(order.items)
         items_summary = "\n".join([
-            f"- {item['name']} (x{item['quantity']}): RWF {item['price'] * item['quantity']:,}" 
-            for item in items_data
+            f"- {oi.item.name} (x{oi.quantity}): RWF {oi.price * oi.quantity:,}" 
+            for oi in order.order_items
         ])
         
         subject = f"Invoice for Your Order #{order.id}"
@@ -398,7 +399,6 @@ def checkout():
 
     order = Order(
         user_id=current_user.id,
-        items=json.dumps(cart),
         total_price=total_amount,
         payment_method=form.payment_method.data,
         sector=form.sector.data,
@@ -409,6 +409,16 @@ def checkout():
     )
 
     db.session.add(order)
+    db.session.flush() # Secure the Order ID before committing
+
+    for item_data in cart:
+        order_item = OrderItem(
+            order_id=order.id,
+            item_id=item_data['id'],
+            quantity=item_data['quantity'],
+            price=item_data['price']
+        )
+        db.session.add(order_item)
 
     new_transaction = Transaction(
         user_id=current_user.id,
@@ -578,14 +588,10 @@ def admin_dashboard():
         monthly_sales.append(int(sales))
 
     product_counts = {}
-    for order in Order.query.all():
-        try:
-            items_data = json.loads(order.items)
-        except (TypeError, ValueError):
-            continue
-        for item in items_data:
-            product_counts[item.get('name', 'Unknown')] = product_counts.get(item.get('name', 'Unknown'), 0) + item.get('quantity', 0)
-
+    items_sold = db.session.query(Item.name, db.func.sum(OrderItem.quantity)).join(OrderItem).group_by(Item.name).all()
+    for name, count in items_sold:
+        product_counts[name] = count
+        
     top_products = sorted(product_counts.items(), key=lambda kv: kv[1], reverse=True)[:5]
     top_product_labels = [label for label, _ in top_products]
     top_product_values = [value for _, value in top_products]
@@ -737,7 +743,7 @@ def admin_settings():
         flash('Admin access only', category='danger')
         return redirect(url_for('market_page'))
 
-    settings = SiteSettings.query.first()
+    settings = db.session.execute(select(SiteSettings)).scalar_one_or_none()
     if not settings:
         settings = SiteSettings(id=1)
         db.session.add(settings)
@@ -746,6 +752,9 @@ def admin_settings():
     form = SettingsForm(obj=settings)
     if form.validate_on_submit():
         settings.business_name = form.business_name.data
+        settings.tagline = form.tagline.data
+        settings.logo_url = form.logo_url.data
+        settings.meta_description = form.meta_description.data
         settings.whatsapp_number = form.whatsapp_number.data
         settings.contact_email = form.contact_email.data
         settings.business_phone = form.business_phone.data

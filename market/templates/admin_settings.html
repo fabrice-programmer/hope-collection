@@ -17,10 +17,28 @@
                         {{ form.hidden_tag() }}
                         
                         <!-- Section: Brand Identity -->
-                        <h5 class="text-primary border-bottom pb-2 mb-3"><i class="bi bi-shop me-2"></i>Brand Identity</h5>
+                        <h5 class="text-primary border-bottom pb-2 mb-3"><i class="bi bi-patch-check me-2"></i>Global Identity</h5>
+                        <div class="row mb-4">
+                            <div class="col-md-6 mb-3">
+                                {{ form.business_name.label(class="form-label fw-bold") }}
+                                {{ form.business_name(class="form-control form-control-lg") }}
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                {{ form.tagline.label(class="form-label fw-bold") }}
+                                {{ form.tagline(class="form-control form-control-lg", placeholder="Quality meets style") }}
+                            </div>
+                            <div class="col-12">
+                                {{ form.logo_url.label(class="form-label fw-bold") }}
+                                {{ form.logo_url(class="form-control", placeholder="/static/images/logo.png") }}
+                            </div>
+                        </div>
+
+                        <!-- Section: SEO & Visibility -->
+                        <h5 class="text-secondary border-bottom pb-2 mb-3"><i class="bi bi-search me-2"></i>SEO & Visibility</h5>
                         <div class="mb-4">
-                            {{ form.business_name.label(class="form-label fw-bold") }}
-                            {{ form.business_name(class="form-control form-control-lg", placeholder="e.g. Hope Collection") }}
+                            {{ form.meta_description.label(class="form-label fw-bold") }}
+                            {{ form.meta_description(class="form-control", rows="2") }}
+                            <small class="text-muted">Brief description of your store for Search Engines (max 255 chars).</small>
                         </div>
 
                         <!-- Section: Contact Channels -->

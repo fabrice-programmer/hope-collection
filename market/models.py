@@ -22,9 +22,10 @@ class User(db.Model, UserMixin):  # ✅ FIXED: only ONE User class (merged both 
     email_address    = db.Column(db.String(120), nullable=False, unique=True)
     password_hash    = db.Column(db.String(200), nullable=False)
     budget           = db.Column(db.Integer, nullable=False, default=1000)
+    is_admin         = db.Column(db.Boolean, default=False)
+    created_at       = db.Column(db.DateTime, default=lambda: datetime.now(timezone.utc))
 
     # Relationships
-    items            = db.relationship('Item', backref='owned_user', lazy=True)
     top_up_requests  = db.relationship(
                             'TopUpRequest',
                             backref='requester',           # ✅ FIXED: renamed backref to avoid clash with Transaction backref 'user'
@@ -66,6 +67,16 @@ class User(db.Model, UserMixin):  # ✅ FIXED: only ONE User class (merged both 
 
 
 # -------------------------
+# CATEGORY
+# -------------------------
+class Category(db.Model):
+    __tablename__ = 'category'
+    id   = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(50), nullable=False, unique=True)
+    items = db.relationship('Item', backref='category', lazy=True)
+
+
+# -------------------------
 # ITEM
 # -------------------------
 class Item(db.Model):
@@ -76,9 +87,11 @@ class Item(db.Model):
     price       = db.Column(db.Integer, nullable=False)
     barcode     = db.Column(db.String(12), nullable=False)
     description = db.Column(db.String(1024), nullable=False)
-    image_file  = db.Column(db.String(20), nullable=False, default='default.jpg')
-    video_file  = db.Column(db.String(20), nullable=True)
-    owner       = db.Column(db.Integer, db.ForeignKey('user.id'))
+    image_file  = db.Column(db.String(255), nullable=False, default='default.jpg')
+    video_file  = db.Column(db.String(255), nullable=True)
+    stock       = db.Column(db.Integer, default=0)
+    category_id = db.Column(db.Integer, db.ForeignKey('category.id'))
+    created_at  = db.Column(db.DateTime, default=lambda: datetime.now(timezone.utc))
 
     def __repr__(self):
         return f"Item('{self.name}')"
@@ -113,7 +126,6 @@ class Order(db.Model):
 
     id             = db.Column(db.Integer, primary_key=True)
     user_id        = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
-    items          = db.Column(db.Text, nullable=False)       # JSON string of cart items
     total_price    = db.Column(db.Integer, nullable=False)
     payment_method = db.Column(db.String(20), nullable=False)
     sector         = db.Column(db.String(100), nullable=False)
@@ -127,16 +139,24 @@ class Order(db.Model):
 
     user     = db.relationship('User', foreign_keys=[user_id],     backref='orders')
     approver = db.relationship('User', foreign_keys=[approver_id], backref='approved_orders')
-
-    @property
-    def parsed_items(self):
-        try:
-            return json.loads(self.items)
-        except (TypeError, ValueError):
-            return []
+    order_items = db.relationship('OrderItem', backref='order', lazy=True, cascade="all, delete-orphan")
 
     def __repr__(self):
         return f"Order(user_id={self.user_id}, total={self.total_price}, status={self.status})"
+
+
+# -------------------------
+# ORDER ITEM
+# -------------------------
+class OrderItem(db.Model):
+    __tablename__ = 'order_item'
+    id       = db.Column(db.Integer, primary_key=True)
+    order_id = db.Column(db.Integer, db.ForeignKey('orders.id'), nullable=False)
+    item_id  = db.Column(db.Integer, db.ForeignKey('item.id'), nullable=False)
+    quantity = db.Column(db.Integer, nullable=False, default=1)
+    price    = db.Column(db.Integer, nullable=False) # Price at time of purchase
+
+    item = db.relationship('Item')
 
 
 # -------------------------
@@ -163,6 +183,9 @@ class SiteSettings(db.Model):
 
     id               = db.Column(db.Integer, primary_key=True)
     business_name    = db.Column(db.String(100), nullable=False, default='Hope Collection')
+    tagline          = db.Column(db.String(255), default='Your one-stop boutique for elegance.')
+    logo_url         = db.Column(db.String(255), default='/static/images/logo.png')
+    meta_description = db.Column(db.String(255), default='Hope Collection - Quality jewelry, electronics, and accessories.')
     whatsapp_number  = db.Column(db.String(20), nullable=False, default='250791641207')
     contact_email    = db.Column(db.String(120), nullable=False, default='niyonsabafabrice03@gmail.com')
     business_phone   = db.Column(db.String(20))
