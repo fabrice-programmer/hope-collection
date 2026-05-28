@@ -53,6 +53,17 @@ def save_video(form_video):
     form_video.save(video_path)
     return video_fn
 
+def save_logo(form_logo):
+    random_hex = secrets.token_hex(8)
+    _, f_ext = os.path.splitext(form_logo.filename)
+    logo_fn = random_hex + f_ext.lower()
+    logo_path = os.path.join(app.root_path, 'static/images/logos', logo_fn)
+
+    os.makedirs(os.path.dirname(logo_path), exist_ok=True)
+
+    form_logo.save(logo_path)
+    return f'/static/images/logos/{logo_fn}'
+
 def send_invoice_email(user, order):
     try:
         items_summary = "\n".join([
@@ -208,6 +219,10 @@ def market_page():
 @app.route('/about')
 def about_page():
     return render_template('about.html')
+
+@app.route('/contact')
+def contact_page():
+    return render_template('contact.html')
 
 
 # -------------------------
@@ -761,7 +776,8 @@ def admin_settings():
     if form.validate_on_submit():
         settings.business_name = form.business_name.data
         settings.tagline = form.tagline.data
-        settings.logo_url = form.logo_url.data
+        if form.logo_file.data:
+            settings.logo_url = save_logo(form.logo_file.data)
         settings.meta_description = form.meta_description.data
         settings.whatsapp_number = form.whatsapp_number.data
         settings.contact_email = form.contact_email.data
@@ -776,4 +792,4 @@ def admin_settings():
         flash('Site settings have been updated!', category='success')
         return redirect(url_for('admin_dashboard'))
 
-    return render_template('admin_settings.html', form=form, title="Business Settings")
+    return render_template('admin_settings.html', form=form, settings=settings, title="Business Settings")

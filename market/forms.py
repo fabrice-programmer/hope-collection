@@ -183,9 +183,9 @@ class SettingsForm(FlaskForm):
         label='Site Tagline / Slogan:',
         validators=[Length(max=255)]
     )
-    logo_url = StringField(
-        label='Logo Image URL:',
-        validators=[Length(max=255)]
+    logo_file = FileField(
+        label='Upload Logo:',
+        validators=[FileAllowed(['jpg', 'jpeg', 'png', 'webp', 'gif'], 'Images only, please.')]
     )
     meta_description = TextAreaField(
         label='SEO Meta Description (for Google search):',

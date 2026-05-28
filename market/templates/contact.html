@@ -1,0 +1,124 @@
+{% extends 'base.html' %}
+
+{% block title %}
+    Contact - {{ site_settings.business_name }}
+{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-10">
+            <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3 mb-4">
+                <div>
+                    <p class="text-primary fw-semibold mb-2">Contact</p>
+                    <h1 class="display-6 fw-bold mb-2">{{ site_settings.business_name }}</h1>
+                    {% if site_settings.tagline %}
+                        <p class="lead text-muted mb-0">{{ site_settings.tagline }}</p>
+                    {% endif %}
+                </div>
+
+                {% if current_user.is_authenticated and (current_user.is_admin or current_user.id == 1) %}
+                    <a href="{{ url_for('admin_settings') }}" class="btn btn-dark">
+                        <i class="bi bi-pencil-square me-2"></i>Edit Contact Info
+                    </a>
+                {% endif %}
+            </div>
+
+            <div class="row g-4">
+                <div class="col-md-6">
+                    <div class="card h-100 border-0 shadow-sm">
+                        <div class="card-body p-4">
+                            <div class="d-flex align-items-center gap-3 mb-3">
+                                <span class="badge rounded-pill text-bg-success p-3">
+                                    <i class="bi bi-whatsapp fs-5"></i>
+                                </span>
+                                <div>
+                                    <h2 class="h5 mb-1">WhatsApp</h2>
+                                    <p class="text-muted mb-0">Message us directly</p>
+                                </div>
+                            </div>
+                            <a class="btn btn-outline-success w-100" href="https://wa.me/{{ site_settings.whatsapp_number }}" target="_blank" rel="noopener">
+                                {{ site_settings.whatsapp_number }}
+                            </a>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-md-6">
+                    <div class="card h-100 border-0 shadow-sm">
+                        <div class="card-body p-4">
+                            <div class="d-flex align-items-center gap-3 mb-3">
+                                <span class="badge rounded-pill text-bg-primary p-3">
+                                    <i class="bi bi-envelope fs-5"></i>
+                                </span>
+                                <div>
+                                    <h2 class="h5 mb-1">Email</h2>
+                                    <p class="text-muted mb-0">Send us an email</p>
+                                </div>
+                            </div>
+                            <a class="btn btn-outline-primary w-100" href="mailto:{{ site_settings.contact_email }}">
+                                {{ site_settings.contact_email }}
+                            </a>
+                        </div>
+                    </div>
+                </div>
+
+                {% if site_settings.business_phone %}
+                    <div class="col-md-6">
+                        <div class="card h-100 border-0 shadow-sm">
+                            <div class="card-body p-4">
+                                <div class="d-flex align-items-center gap-3 mb-3">
+                                    <span class="badge rounded-pill text-bg-dark p-3">
+                                        <i class="bi bi-telephone fs-5"></i>
+                                    </span>
+                                    <div>
+                                        <h2 class="h5 mb-1">Phone</h2>
+                                        <p class="text-muted mb-0">Call our business line</p>
+                                    </div>
+                                </div>
+                                <a class="btn btn-outline-dark w-100" href="tel:{{ site_settings.business_phone }}">
+                                    {{ site_settings.business_phone }}
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                {% endif %}
+
+                {% if site_settings.business_address %}
+                    <div class="col-md-6">
+                        <div class="card h-100 border-0 shadow-sm">
+                            <div class="card-body p-4">
+                                <div class="d-flex align-items-center gap-3 mb-3">
+                                    <span class="badge rounded-pill text-bg-secondary p-3">
+                                        <i class="bi bi-geo-alt fs-5"></i>
+                                    </span>
+                                    <div>
+                                        <h2 class="h5 mb-1">Address</h2>
+                                        <p class="text-muted mb-0">Visit or locate us</p>
+                                    </div>
+                                </div>
+                                <p class="mb-0 fw-semibold">{{ site_settings.business_address }}</p>
+                            </div>
+                        </div>
+                    </div>
+                {% endif %}
+            </div>
+
+            {% if site_settings.instagram_url or site_settings.facebook_url %}
+                <div class="mt-4 d-flex flex-wrap gap-2">
+                    {% if site_settings.instagram_url %}
+                        <a href="{{ site_settings.instagram_url }}" target="_blank" rel="noopener" class="btn btn-outline-dark">
+                            <i class="bi bi-instagram me-2"></i>Instagram
+                        </a>
+                    {% endif %}
+                    {% if site_settings.facebook_url %}
+                        <a href="{{ site_settings.facebook_url }}" target="_blank" rel="noopener" class="btn btn-outline-dark">
+                            <i class="bi bi-facebook me-2"></i>Facebook
+                        </a>
+                    {% endif %}
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}
