@@ -195,17 +195,7 @@ def delete_item(item_id):
 @app.route('/')
 def home_page():
     featured_items = Item.query.order_by(Item.id.desc()).limit(8).all()
-    jewelry_items = Item.query.filter(
-        (Item.name.contains('Jewelry')) | 
-        (Item.name.contains('Ring')) | 
-        (Item.name.contains('Bracelet')) |
-        (Item.name.contains('Hairband')) |
-        (Item.name.contains('Headband')) |
-        (Item.name.contains('Fan'))
-    ).all()
-    return render_template('home.html', 
-                         featured_items=featured_items, 
-                         jewelry_items=jewelry_items)
+    return render_template('home.html', featured_items=featured_items)
 
 
 @app.route('/market')

@@ -1,245 +1,180 @@
 {% extends 'base.html' %}
 
-{% block title %}Hope Collection | Premium Shopping in Rwanda{% endblock %}
+{% block title %}Hope Collection | Premium Jewelry, Hair Accessories & Beauty Essentials in Rwanda{% endblock %}
 
 {% block content %}
-<!-- Google Fonts for a professional look -->
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&family=Playfair+Display:wght@700&display=swap" rel="stylesheet">
 
-<style>
-    :root {
-        --brand-gold: #D4AF37;
-        --whatsapp-green: #25D366;
-        --soft-bg: #ffffff;
-    }
-    body { font-family: 'Inter', sans-serif; background-color: var(--soft-bg); }
-
-    .hero-section {
-        background: linear-gradient(135deg, #e0f2fe 0%, #ffffff 100%);
-        border-bottom: 1px solid #bae6fd;
-        color: #0c4a6e;
-        padding: 120px 0;
-        margin-bottom: 3rem;
-    .hero-lead {
-        font-size: 1.25rem;
-        max-width: 600px;
-        margin-bottom: 2rem;
-        color: #4a4a4a;
-    }
-    .hero-actions .btn { padding: 12px 30px; font-weight: 600; border-radius: 8px; }
-    .trust-row { margin-top: 2.5rem; display: flex; flex-wrap: wrap; gap: 2rem; font-size: 0.95rem; }
-    .trust-row i { color: #25D366; font-size: 1.2rem; }
-    .product-card {
-        transition: transform 0.3s ease;
-        border: none;
-        border-radius: 1.5rem;
-        overflow: hidden;
-        background: #fff;
-    }
-    .product-card:hover { transform: translateY(-10px); }
-    .product-media img {
-        height: 280px;
-        object-fit: cover;
-    }
-    /* Jewelry Section Styles */
-    .jewelry-section {
-        background-color: #ffffff;
-        padding: 100px 0;
-    }
-    .jewelry-header {
-        max-width: 700px;
-        margin: 0 auto 60px;
-        text-align: center;
-    }
-    .jewelry-header h2 {
-        font-family: 'Playfair Display', serif;
-        font-size: 2.5rem;
-        letter-spacing: 2px;
-        color: #2c2c2c;
-    }
-    .jewelry-card {
-        background: transparent !important;
-        border: none !important;
-        text-align: center;
-    }
-    .jewelry-card .jewelry-price {
-        color: var(--brand-gold);
-        font-weight: 600;
-        font-size: 1.1rem;
-    }
-    /* Horizontal Scroll Container */
-    .scroll-container {
-        display: flex;
-        overflow-x: auto;
-        gap: 2rem;
-        padding: 20px 0 40px;
-        scrollbar-width: none; /* Firefox */
-    }
-    .scroll-container::-webkit-scrollbar { display: none; } /* Chrome/Safari */
-    
-    .scroll-item {
-        min-width: 300px;
-    }
-    .rating-stars {
-        color: #ffc107;
-        font-size: 0.85rem;
-        margin-bottom: 8px;
-    }
-    .btn-whatsapp {
-        background-color: var(--whatsapp-green);
-        color: white;
-        border: none;
-        transition: opacity 0.3s;
-    }
-    .btn-whatsapp:hover {
-        background-color: #1ebe57;
-        color: white;
-        opacity: 0.9;
-    }
-</style>
-
-<section class="hero-section">
+<!-- ============================================ -->
+<!-- HERO — Amazon-Style with Real Products       -->
+<!-- ============================================ -->
+<section class="hero-amazon">
     <div class="container">
-        <div class="text-center">
-            <p class="text-uppercase tracking-widest fw-bold text-info mb-3" style="letter-spacing: 5px;">Exclusive Rwandan Boutique</p>
-            <h1 class="display-3 fw-bold mb-4" style="font-family: 'Playfair Display', serif; color: #0369a1;">Elegance & Style</h1>
-            <p class="hero-lead mx-auto text-dark opacity-75">Your premier destination for luxury jewelry, handcrafted hair bands, and the latest beauty essentials.</p>
-            <div class="hero-actions mt-4">
-                <a href="{{ url_for('market_page') }}" class="btn btn-primary btn-lg px-5 shadow-lg">Shop The Collection</a>
-                <a href="#jewelry" class="btn btn-outline-info btn-lg px-5 ms-3">View Lookbook</a>
-            </div>
-        </div>
-    </div>
-</section>
-
-<!-- Boutique Experience Section -->
-<section class="py-5 bg-white">
-    <div class="container">
-        <div class="row g-4 text-center">
-            <div class="col-md-4">
-                <div class="p-4">
-                    <i class="bi bi-gem fs-1 text-primary mb-3"></i>
-                    <h4 class="fw-bold">Premium Quality</h4>
-                    <p class="text-muted">Hand-selected jewelry and hair bands made with high-quality materials for lasting elegance.</p>
+        <div class="row align-items-center hero-amazon-content">
+            <div class="col-lg-7">
+                <span class="hero-amazon-badge"><i class="bi bi-star-fill me-1"></i> Premium Collection — Rwanda</span>
+                <h1>Your Style, Delivered<br>with Elegance</h1>
+                <p class="hero-amazon-sub">
+                    Curated jewelry, handcrafted hair bands, and beauty essentials — 
+                    hand-selected for those who value quality and style.
+                </p>
+                <div class="hero-amazon-actions">
+                    <a href="{{ url_for('market_page') }}" class="btn btn-primary">
+                        <i class="bi bi-bag-check me-2"></i>Shop the Collection
+                    </a>
+                    <a href="#products" class="btn btn-outline-light">
+                        <i class="bi bi-grid me-2"></i>Browse Products
+                    </a>
+                </div>
+                <div class="d-flex flex-wrap gap-4 mt-4">
+                    <div class="d-flex align-items-center gap-2 text-light" style="opacity:0.8;font-size:0.82rem;">
+                        <i class="bi bi-shield-check"></i> Quality Guaranteed
+                    </div>
+                    <div class="d-flex align-items-center gap-2 text-light" style="opacity:0.8;font-size:0.82rem;">
+                        <i class="bi bi-truck"></i> Fast Delivery in Rwanda
+                    </div>
+                    <div class="d-flex align-items-center gap-2 text-light" style="opacity:0.8;font-size:0.82rem;">
+                        <i class="bi bi-whatsapp"></i> WhatsApp Support
+                    </div>
                 </div>
             </div>
-            <div class="col-md-4">
-                <div class="p-4">
-                    <i class="bi bi-stars fs-1 text-primary mb-3"></i>
-                    <h4 class="fw-bold">Modern Style</h4>
-                    <p class="text-muted">Stay ahead of the fashion curve with our weekly updated collection of modern accessories.</p>
-                </div>
-            </div>
-            <div class="col-md-4">
-                <div class="p-4">
-                    <i class="bi bi-truck fs-1 text-primary mb-3"></i>
-                    <h4 class="fw-bold">Fast Delivery</h4>
-                    <p class="text-muted">Quick and reliable delivery across Rwanda so you can enjoy your new look sooner.</p>
-                </div>
-            </div>
-        </div>
-    </div>
-</section>
-
-<section class="jewelry-section" id="jewelry">
-    <div class="container">
-        <div class="jewelry-header">
-            <p class="text-uppercase text-muted small fw-bold ls-3 mb-2">Signature Pieces</p>
-            <h2 class="mb-3">Girls' Hair Bands & Accessories</h2>
-            <div class="mx-auto bg-dark" style="width: 50px; height: 1px;"></div>
-            <p class="text-muted mt-3">Scroll to discover our beautiful jewelry, hairbands, and accessories.</p>
-        </div>
-        
-        <div class="scroll-container">
-            {% for item in jewelry_items %}
-            <div class="scroll-item">
-                <div class="card jewelry-card">
-                    <div class="product-media rounded-0 mb-4 shadow-sm">
-                        {% if item.video_file %}
-                            <video class="w-100" style="height: 280px; object-fit: cover;" autoplay muted loop>
-                                <source src="{{ url_for('static', filename='product_videos/' ~ item.video_file) }}" type="video/mp4">
-                            </video>
-                        {% else %}
-                            <img data-product-img 
-                                 src="{{ url_for('static', filename='product_pics/' ~ item.image_file) }}" 
-                                 onerror="this.src='{{ url_for('static', filename='images/products/product-' ~ item.id ~ '.jpg') }}'"
-                                 alt="{{ item.name }}">
+            <div class="col-lg-5 mt-4 mt-lg-0">
+                <div class="hero-showcase-grid">
+                    {% if featured_items and featured_items|length > 0 %}
+                        {% set first = featured_items[0] %}
+                        <div class="hero-product-card featured">
+                            <span class="hero-product-label">Featured</span>
+                            <img src="{{ url_for('static', filename='product_pics/' ~ first.image_file) }}"
+                                 alt="{{ first.name }}"
+                                 class="hero-product-img"
+                                 onerror="this.parentElement.classList.add('d-none')">
+                            <div class="hero-product-info">
+                                <strong>{{ first.name }}</strong>
+                                <span>RWF {{ "{:,}".format(first.price) }}</span>
+                            </div>
+                        </div>
+                        {% if featured_items|length > 1 %}
+                            {% for item in featured_items[1:3] %}
+                            <div class="hero-product-card">
+                                <img src="{{ url_for('static', filename='product_pics/' ~ item.image_file) }}"
+                                     alt="{{ item.name }}"
+                                     class="hero-product-img"
+                                     onerror="this.parentElement.classList.add('d-none')">
+                                <div class="hero-product-info">
+                                    <strong>{{ item.name[:20] }}{% if item.name|length > 20 %}…{% endif %}</strong>
+                                    <span>RWF {{ "{:,}".format(item.price) }}</span>
+                                </div>
+                            </div>
+                            {% endfor %}
                         {% endif %}
-                    </div>
-                    <div class="rating-stars">⭐⭐⭐⭐☆</div>
-                    <h5 class="fw-bold mb-1">{{ item.name }}</h5>
-                    <p class="jewelry-price mb-3">RWF {{ "{:,}".format(item.price) }}</p>
-                    <div class="d-flex justify-content-center gap-2">
-                        <a href="{{ url_for('add_to_cart', item_id=item.id) }}" class="btn btn-outline-dark btn-sm px-4">
-                            Add to Cart
-                        </a>
-                        <a target="_blank" rel="noopener"
-                           href="https://wa.me/{{ site_settings.whatsapp_number }}?text={{ ('Hello Hope Collection, I am interested in the ' ~ item.name)|urlencode }}" 
-                           class="btn btn-whatsapp btn-sm px-4">
-                            <i class="bi bi-whatsapp"></i> Order on WhatsApp
-                        </a>
-                    </div>
+                    {% else %}
+                        <div class="hero-product-card featured" style="background:linear-gradient(135deg, #2a2a3e, #1a1a2e);">
+                            <div class="hero-product-info text-center py-4">
+                                <i class="bi bi-gem display-5 text-warning"></i>
+                                <strong class="text-white mt-2 d-block">Premium Jewelry</strong>
+                                <span class="text-light opacity-75">Starting at RWF 5,000</span>
+                            </div>
+                        </div>
+                        <div class="hero-product-card" style="background:linear-gradient(135deg, #2d2d40, #1e1e32);">
+                            <div class="hero-product-info text-center py-3">
+                                <i class="bi bi-scissors display-6 text-warning"></i>
+                                <strong class="text-white mt-1 d-block">Hair Bands</strong>
+                            </div>
+                        </div>
+                        <div class="hero-product-card" style="background:linear-gradient(135deg, #2d2d40, #1e1e32);">
+                            <div class="hero-product-info text-center py-3">
+                                <i class="bi bi-star display-6 text-warning"></i>
+                                <strong class="text-white mt-1 d-block">Beauty</strong>
+                            </div>
+                        </div>
+                    {% endif %}
                 </div>
             </div>
-            {% endfor %}
         </div>
     </div>
 </section>
 
-<section class="shopping-section">
+<!-- ============================================ -->
+<!-- CATEGORY STRIP — Amazon-Style Pills          -->
+<!-- ============================================ -->
+<div class="category-strip">
     <div class="container">
-        <div class="section-heading">
-            <div>
-                <p class="section-kicker">Featured products</p>
-                <h2 class="fw-bold">New Arrivals in Rwanda</h2>
-            </div>
-            {% if current_user.is_authenticated %}
-                <a href="{{ url_for('market_page') }}" class="btn btn-outline-dark">
-                    View all <i class="bi bi-arrow-right"></i>
-                </a>
-            {% else %}
-                <a href="{{ url_for('register_page') }}" class="btn btn-outline-dark">
-                    Create account <i class="bi bi-arrow-right"></i>
-                </a>
-            {% endif %}
+        <div class="category-strip-inner">
+            <a href="{{ url_for('market_page') }}" class="category-pill">
+                <i class="bi bi-grid-3x3-gap"></i> All Products
+            </a>
+            <a href="{{ url_for('market_page') }}" class="category-pill">
+                <i class="bi bi-gem"></i> Jewelry
+            </a>
+            <a href="{{ url_for('market_page') }}" class="category-pill">
+                <i class="bi bi-scissors"></i> Hair Accessories
+            </a>
+            <a href="{{ url_for('market_page') }}" class="category-pill">
+                <i class="bi bi-star"></i> Beauty Essentials
+            </a>
+            <a href="{{ url_for('market_page') }}" class="category-pill">
+                <i class="bi bi-phone"></i> Electronics
+            </a>
+            <a href="{{ url_for('market_page') }}" class="category-pill">
+                <i class="bi bi-percent"></i> Deals
+            </a>
+            <a href="{{ url_for('market_page') }}" class="category-pill">
+                <i class="bi bi-truck"></i> Best Sellers
+            </a>
+        </div>
+    </div>
+</div>
+
+<!-- ============================================ -->
+<!-- PRODUCT SECTION — Amazon 2-Row Grid          -->
+<!-- ============================================ -->
+<section class="shopping-section" id="products">
+    <div class="container">
+        <div class="section-header-amazon">
+            <h2>Featured Products</h2>
+            <a href="{{ url_for('market_page') }}">See All <i class="bi bi-chevron-right"></i></a>
         </div>
 
         {% if featured_items %}
-            <div class="row g-4">
+            <div class="row g-3">
                 {% for item in featured_items %}
-                    <div class="col-sm-6 col-lg-4 animate-rise" style="animation-delay: {{ loop.index0 * 0.08 }}s;">
+                    <div class="col-6 col-md-4 col-lg-3 animate-rise" style="animation-delay: {{ loop.index0 * 0.06 }}s;">
                         <article class="product-card h-100">
                             <div class="product-media">
-                                {% set img_keyword = item.name.split(' ')[-1] | lower %}
                                 <img data-product-img 
                                      src="{{ url_for('static', filename='product_pics/' ~ item.image_file) }}" 
-                                     onerror="this.src='https://images.unsplash.com/photo-1573408301185-9146fe634ad0?auto=format&fit=crop&q=80&w=600'"
+                                     onerror="this.closest('.product-media').classList.add('image-missing'); this.remove();"
                                      alt="{{ item.name }}">
                                 <div class="fallback-product-icon"><i class="bi bi-box-seam"></i></div>
-                                <span class="product-badge">Trending</span>
+                                {% if loop.first %}
+                                <span class="product-badge">BEST SELLER</span>
+                                {% endif %}
                             </div>
                             <div class="product-body">
-                                <div>
-                                    <h3>{{ item.name }}</h3>
-                                    <p>{{ item.description }}</p>
+                                <h3>{{ item.name }}</h3>
+                                <div class="product-rating">
+                                    <i class="bi bi-star-fill"></i>
+                                    <i class="bi bi-star-fill"></i>
+                                    <i class="bi bi-star-fill"></i>
+                                    <i class="bi bi-star-fill"></i>
+                                    <i class="bi bi-star-half"></i>
+                                    <span>({{ 10 + loop.index }})</span>
                                 </div>
                                 <div class="product-meta">
-                                    <span>RWF {{ "{:,}".format(item.price) }}</span>
-                                    <small>Code {{ item.barcode }}</small>
+                                    <span class="price">RWF {{ "{:,}".format(item.price) }}</span>
                                 </div>
                                 <div class="product-actions">
                                     {% if current_user.is_authenticated %}
-                                        <a href="{{ url_for('add_to_cart', item_id=item.id) }}" class="btn btn-dark">
-                                            <i class="bi bi-bag-plus"></i> Add
+                                        <a href="{{ url_for('add_to_cart', item_id=item.id) }}" class="btn btn-amazon">
+                                            <i class="bi bi-cart-plus"></i> Add to Cart
                                         </a>
                                     {% else %}
-                                        <a href="{{ url_for('login_page') }}" class="btn btn-dark">
-                                            <i class="bi bi-box-arrow-in-right"></i> Login
+                                        <a href="{{ url_for('login_page') }}" class="btn btn-amazon">
+                                            <i class="bi bi-box-arrow-in-right"></i> Login to Order
                                         </a>
                                     {% endif %}
-                                    <a class="btn btn-success" target="_blank" rel="noopener"
+                                    <a class="btn btn-amazon-outline" target="_blank" rel="noopener"
                                        href="https://wa.me/{{ site_settings.whatsapp_number }}?text={{ ('Hello Hope Collection, I want to order ' ~ item.name ~ ' for RWF ' ~ item.price)|urlencode }}">
-                                        <i class="bi bi-whatsapp"></i> Order
+                                        <i class="bi bi-whatsapp"></i>
                                     </a>
                                 </div>
                             </div>
@@ -250,49 +185,129 @@
         {% else %}
             <div class="empty-products">
                 <i class="bi bi-bag-heart"></i>
-                <h3>Products are coming soon</h3>
-                <p>Add products from your admin area and they will appear here automatically.</p>
+                <h3>Products Coming Soon</h3>
+                <p>We're adding new items to our collection. Check back shortly.</p>
             </div>
         {% endif %}
     </div>
 </section>
 
-<!-- Professional Contact Section -->
-<section class="py-5 bg-light border-top" id="contact">
+<!-- ============================================ -->
+<!-- DEAL BANNER                                   -->
+<!-- ============================================ -->
+<section class="deal-banner">
+    <div class="container">
+        <h2><i class="bi bi-lightning-charge-fill me-2"></i> New Arrivals Weekly</h2>
+        <p>Be the first to discover our latest jewelry, hair accessories, and beauty essentials.</p>
+        <a href="{{ url_for('market_page') }}" class="btn">Shop New Arrivals <i class="bi bi-arrow-right ms-1"></i></a>
+    </div>
+</section>
+
+<!-- ============================================ -->
+<!-- WHY SHOP WITH US — Feature Grid              -->
+<!-- ============================================ -->
+<section class="brand-story">
     <div class="container">
         <div class="row align-items-center">
             <div class="col-lg-6">
-                <h2 class="display-5 fw-bold mb-4" style="font-family: 'Playfair Display', serif;">Get In Touch</h2>
-                <p class="lead text-muted mb-5">Have questions about our collection or need a custom order? Our team in Rwanda is here to help you shine.</p>
-                <div class="d-flex flex-column gap-4">
-                    <div class="d-flex align-items-center gap-3">
-                        <div class="bg-primary text-white rounded-circle d-flex align-items-center justify-content-center" style="width: 50px; height: 50px;">
-                            <i class="bi bi-envelope"></i>
-                        </div>
-                        <div>
-                            <p class="mb-0 text-muted small">Email Us</p>
-                            <h5 class="mb-0">{{ site_settings.contact_email }}</h5>
-                        </div>
-                    </div>
-                    <div class="d-flex align-items-center gap-3">
-                        <div class="bg-success text-white rounded-circle d-flex align-items-center justify-content-center" style="width: 50px; height: 50px;">
-                            <i class="bi bi-whatsapp"></i>
-                        </div>
-                        <div>
-                            <p class="mb-0 text-muted small">WhatsApp Support</p>
-                            <h5 class="mb-0">+{{ site_settings.whatsapp_number }}</h5>
-                        </div>
-                    </div>
-                </div>
+                <h2>Why Shop at Hope Collection?</h2>
+                <p>We curate the best jewelry, hair accessories, and beauty products in Rwanda. Every piece is hand-selected for quality, style, and durability. Your satisfaction is our priority.</p>
             </div>
-            <div class="col-lg-5 offset-lg-1 mt-5 mt-lg-0">
-                <div class="p-5 bg-white shadow-lg rounded-4 text-center">
-                    <h3 class="fw-bold mb-4">Start Shopping</h3>
-                    <p class="text-muted mb-4">Explore our exclusive items and enjoy fast delivery across the country.</p>
-                    <a href="{{ url_for('market_page') }}" class="btn btn-dark btn-lg w-100">Browse Market</a>
+            <div class="col-lg-6">
+                <div class="feature-grid-amazon">
+                    <div class="feature-item-amazon">
+                        <i class="bi bi-shield-check"></i>
+                        <h5>Authentic Products</h5>
+                        <p>Every item carefully sourced and verified.</p>
+                    </div>
+                    <div class="feature-item-amazon">
+                        <i class="bi bi-credit-card"></i>
+                        <h5>Secure Payments</h5>
+                        <p>MTN Mobile Money, Equity Bank, wallet.</p>
+                    </div>
+                    <div class="feature-item-amazon">
+                        <i class="bi bi-truck"></i>
+                        <h5>Fast Delivery</h5>
+                        <p>Reliable shipping across Rwanda.</p>
+                    </div>
+                    <div class="feature-item-amazon">
+                        <i class="bi bi-headset"></i>
+                        <h5>24/7 Support</h5>
+                        <p>WhatsApp & email, always here to help.</p>
+                    </div>
                 </div>
             </div>
         </div>
     </div>
 </section>
+
+<!-- ============================================ -->
+<!-- CONTACT STRIP                                 -->
+<!-- ============================================ -->
+<section class="py-4 border-top" id="contact" style="background:#fff;">
+    <div class="container">
+        <div class="row align-items-center">
+            <div class="col-md-6">
+                <h5 class="fw-bold mb-1">Need Help?</h5>
+                <p class="text-muted small mb-0">Reach us on WhatsApp or email for quick assistance.</p>
+            </div>
+            <div class="col-md-6 mt-2 mt-md-0">
+                <div class="d-flex gap-3 justify-content-md-end">
+                    <a href="https://wa.me/{{ site_settings.whatsapp_number }}" target="_blank" class="btn btn-success btn-sm rounded-pill px-4">
+                        <i class="bi bi-whatsapp me-1"></i> WhatsApp
+                    </a>
+                    <a href="mailto:{{ site_settings.contact_email }}" class="btn btn-outline-dark btn-sm rounded-pill px-4">
+                        <i class="bi bi-envelope me-1"></i> Email
+                    </a>
+                    <a href="{{ url_for('market_page') }}" class="btn btn-dark btn-sm rounded-pill px-4">
+                        <i class="bi bi-bag me-1"></i> Shop Now
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- ============================================ -->
+<!-- FOOTER — Amazon Dark Style                    -->
+<!-- ============================================ -->
+<footer class="footer-amazon">
+    <div class="container">
+        <div class="row">
+            <div class="col-md-3 mb-3">
+                <h5>{{ site_settings.business_name or 'Hope Collection' }}</h5>
+                <p style="color:rgba(255,255,255,0.5);font-size:0.82rem;">
+                    Premium jewelry, hair accessories & beauty essentials in Rwanda.
+                </p>
+            </div>
+            <div class="col-md-3 mb-3">
+                <h5>Shop</h5>
+                <a href="{{ url_for('market_page') }}">All Products</a>
+                <a href="{{ url_for('market_page') }}">Jewelry</a>
+                <a href="{{ url_for('market_page') }}">Hair Accessories</a>
+                <a href="{{ url_for('market_page') }}">Beauty Essentials</a>
+            </div>
+            <div class="col-md-3 mb-3">
+                <h5>Help</h5>
+                <a href="{{ url_for('contact_page') }}">Contact Us</a>
+                <a href="https://wa.me/{{ site_settings.whatsapp_number }}" target="_blank">WhatsApp Support</a>
+                <a href="mailto:{{ site_settings.contact_email }}">Email Support</a>
+            </div>
+            <div class="col-md-3 mb-3">
+                <h5>Account</h5>
+                {% if current_user.is_authenticated %}
+                    <a href="{{ url_for('transaction_history') }}">My Orders</a>
+                    <a href="{{ url_for('view_cart') }}">My Cart</a>
+                {% else %}
+                    <a href="{{ url_for('login_page') }}">Login</a>
+                    <a href="{{ url_for('register_page') }}">Create Account</a>
+                {% endif %}
+            </div>
+        </div>
+        <div class="footer-amazon-bottom">
+            <p class="mb-0">&copy; 2026 {{ site_settings.business_name or 'Hope Collection' }}. All rights reserved.</p>
+        </div>
+    </div>
+</footer>
+
 {% endblock %}
