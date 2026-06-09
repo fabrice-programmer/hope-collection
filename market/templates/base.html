@@ -16,13 +16,15 @@
 <nav class="navbar navbar-expand-lg navbar-light sticky-top navbar-custom">
     <div class="container-fluid">
         <a class="navbar-brand" href="{{ url_for('home_page') }}">
-            {% if site_settings.logo_url and site_settings.logo_url != '/static/images/logo.png' %}
-                <img src="{{ site_settings.logo_url }}" alt="{{ site_settings.business_name }} logo" class="brand-logo" onerror="this.classList.add('d-none'); this.nextElementSibling.classList.remove('d-none');">
+            {% if site_settings.logo_url and site_settings.logo_url != '/static/images/logo.png' and site_settings.logo_url != '/static/images/logos/hope-collection-logo.svg' %}
+                <img src="{{ site_settings.logo_url }}" alt="{{ site_settings.business_name }} logo" class="brand-logo" onerror="this.classList.add('d-none'); this.nextElementSibling.classList.remove('d-none'); this.nextElementSibling.nextElementSibling.classList.remove('d-none');">
                 <span class="brand-mark d-none">{{ site_settings.business_name[:2].upper() if site_settings.business_name else 'HC' }}</span>
+                <span class="brand-text d-none">{{ site_settings.business_name }}</span>
             {% else %}
-                <span class="brand-mark">{{ site_settings.business_name[:2].upper() if site_settings.business_name else 'HC' }}</span>
+                <img src="{{ url_for('static', filename='images/logos/hope-collection-logo.svg') }}" alt="Hope Collection logo" class="brand-logo" onerror="this.classList.add('d-none'); this.nextElementSibling.classList.remove('d-none'); this.nextElementSibling.nextElementSibling.classList.remove('d-none');">
+                <span class="brand-mark d-none">{{ site_settings.business_name[:2].upper() if site_settings.business_name else 'HC' }}</span>
+                <span class="brand-text d-none">{{ site_settings.business_name }}</span>
             {% endif %}
-            <span class="brand-text">{{ site_settings.business_name }}</span>
         </a>
 
         <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">

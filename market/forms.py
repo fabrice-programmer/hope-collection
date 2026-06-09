@@ -185,7 +185,7 @@ class SettingsForm(FlaskForm):
     )
     logo_file = FileField(
         label='Upload Logo:',
-        validators=[FileAllowed(['jpg', 'jpeg', 'png', 'webp', 'gif', 'svg', 'ico'], 'Images only, please.')]
+        validators=[FileAllowed(['jpg', 'jpeg', 'png', 'webp', 'gif', 'svg', 'ico', 'svg+xml'], 'Images only, please.')]
     )
     meta_description = TextAreaField(
         label='SEO Meta Description (for Google search):',
