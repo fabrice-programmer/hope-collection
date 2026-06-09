@@ -13,7 +13,7 @@
                 <div class="card-body p-4">
                     <p class="text-muted mb-4">Configure your brand identity and store defaults. These details are used globally across your boutique storefront.</p>
                     
-                    <form method="POST" enctype="multipart/form-data">
+                    <form method="POST" enctype="multipart/form-data" id="settingsForm">
                         {{ form.hidden_tag() }}
                         {% if form.errors %}
                             <div class="alert alert-danger">
@@ -138,20 +138,24 @@
                         <h5 class="text-primary border-bottom pb-2 mb-3"><i class="bi bi-credit-card me-2"></i>Payment Methods</h5>
                         <div class="mb-4">
                             <div class="alert alert-info py-2 small">
-                                <i class="bi bi-info-circle me-2"></i> Configure which payment methods are available for checkout. Edit the JSON array below. Each method needs an <code>id</code>, <code>name</code>, and <code>enabled</code> field. Set <code>"enabled": false</code> to disable a method.
+                                <i class="bi bi-info-circle me-2"></i> Add, edit, or remove payment methods below. Use the toggle to enable/disable a method. Changes are saved when you click "Update Settings".
                             </div>
-                            {{ form.payment_methods.label(class="form-label fw-bold") }}
-                            {{ form.payment_methods(class="form-control font-monospace" ~ (" is-invalid" if form.payment_methods.errors else ""), rows="6") }}
-                            {% for error in form.payment_methods.errors %}
-                                <div class="invalid-feedback d-block">{{ error }}</div>
-                            {% endfor %}
-                            <div class="mt-2">
-                                <button type="button" class="btn btn-sm btn-outline-secondary" onclick="document.getElementById('payment_methods').value = '[{\"id\":\"wallet\",\"name\":\"Wallet Balance\",\"enabled\":true},{\"id\":\"mtn\",\"name\":\"MTN Mobile Money\",\"enabled\":true},{\"id\":\"equity\",\"name\":\"Equity Bank Transfer\",\"enabled\":true}]';">
-                                    <i class="bi bi-arrow-counterclockwise me-1"></i>Reset Default
-                                </button>
-                                <button type="button" class="btn btn-sm btn-outline-primary" onclick="try { const v = JSON.parse(document.getElementById('payment_methods').value); document.getElementById('payment_methods').value = JSON.stringify(v, null, 2); } catch(e) { alert('Invalid JSON: ' + e.message); }">
-                                    <i class="bi bi-text-indent-left me-1"></i>Format JSON
-                                </button>
+                            
+                            <!-- Hidden field to store JSON (same field, just hidden) -->
+                            {{ form.payment_methods(class="d-none", id="payment_methods_hidden") }}
+
+                            <!-- Visual Payment Methods Editor -->
+                            <div id="payment-methods-container">
+                                <div id="payment-methods-list" class="mb-3"></div>
+                                
+                                <div class="d-flex gap-2 flex-wrap">
+                                    <button type="button" class="btn btn-outline-primary" onclick="addPaymentMethod()">
+                                        <i class="bi bi-plus-circle me-1"></i> Add Payment Method
+                                    </button>
+                                    <button type="button" class="btn btn-outline-secondary" onclick="resetPaymentMethods()">
+                                        <i class="bi bi-arrow-counterclockwise me-1"></i> Reset Defaults
+                                    </button>
+                                </div>
                             </div>
                         </div>
 
@@ -173,4 +177,153 @@
         </div>
     </div>
 </div>
+
+<!-- Payment Methods Editor JavaScript -->
+<script>
+// ===== Payment Methods Manager =====
+const DEFAULT_METHODS = [
+    {id: "wallet", name: "Wallet Balance", enabled: true},
+    {id: "mtn", name: "MTN Mobile Money", enabled: true},
+    {id: "equity", name: "Equity Bank Transfer", enabled: true}
+];
+
+let paymentMethods = [];
+
+function loadPaymentMethods() {
+    const hiddenField = document.getElementById('payment_methods_hidden');
+    try {
+        const val = hiddenField.value.trim();
+        if (val) {
+            const parsed = JSON.parse(val);
+            if (Array.isArray(parsed) && parsed.length > 0) {
+                paymentMethods = parsed;
+                return;
+            }
+        }
+    } catch (e) {
+        // Invalid JSON, fall back to defaults
+    }
+    paymentMethods = JSON.parse(JSON.stringify(DEFAULT_METHODS));
+}
+
+function syncHiddenField() {
+    document.getElementById('payment_methods_hidden').value = JSON.stringify(paymentMethods);
+}
+
+function renderPaymentMethods() {
+    const container = document.getElementById('payment-methods-list');
+    container.innerHTML = '';
+    
+    paymentMethods.forEach((method, index) => {
+        const card = document.createElement('div');
+        card.className = 'card mb-2 border' + (method.enabled ? '' : ' border-secondary opacity-75');
+        card.style.borderLeft = '4px solid ' + (method.enabled ? '#198754' : '#6c757d');
+        
+        card.innerHTML = `
+            <div class="card-body py-2 px-3">
+                <div class="row align-items-center g-2">
+                    <div class="col-md-5">
+                        <label class="form-label small text-muted mb-0">Method Name</label>
+                        <input type="text" class="form-control form-control-sm method-name" 
+                               value="${escapeHtml(method.name)}" 
+                               placeholder="e.g. MTN Mobile Money"
+                               onchange="updateMethod(${index}, 'name', this.value)"
+                               onkeyup="updateMethod(${index}, 'name', this.value)">
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label small text-muted mb-0">ID (slug)</label>
+                        <input type="text" class="form-control form-control-sm method-id font-monospace" 
+                               value="${escapeHtml(method.id)}" 
+                               placeholder="e.g. mtn"
+                               onchange="updateMethod(${index}, 'id', this.value)"
+                               onkeyup="updateMethod(${index}, 'id', this.value)">
+                    </div>
+                    <div class="col-md-2 text-center">
+                        <label class="form-label small text-muted mb-0 d-block">Enabled</label>
+                        <div class="form-check form-switch d-inline-block mt-1">
+                            <input class="form-check-input method-enabled" type="checkbox" 
+                                   ${method.enabled ? 'checked' : ''}
+                                   onchange="updateMethod(${index}, 'enabled', this.checked)"
+                                   style="cursor: pointer; width: 2.5em; height: 1.25em;">
+                        </div>
+                    </div>
+                    <div class="col-md-2 text-end">
+                        <label class="form-label small text-muted mb-0 d-block">&nbsp;</label>
+                        <button type="button" class="btn btn-outline-danger btn-sm" 
+                                onclick="removePaymentMethod(${index})"
+                                title="Remove this payment method">
+                            <i class="bi bi-trash"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        `;
+        container.appendChild(card);
+    });
+}
+
+function escapeHtml(text) {
+    const div = document.createElement('div');
+    div.textContent = text;
+    return div.innerHTML;
+}
+
+function updateMethod(index, field, value) {
+    if (field === 'enabled') {
+        paymentMethods[index].enabled = value;
+    } else if (field === 'id') {
+        paymentMethods[index].id = value;
+    } else if (field === 'name') {
+        paymentMethods[index].name = value;
+    }
+    syncHiddenField();
+    renderPaymentMethods();
+}
+
+function addPaymentMethod() {
+    const baseId = 'method_' + Date.now();
+    paymentMethods.push({
+        id: baseId,
+        name: 'New Payment Method',
+        enabled: true
+    });
+    syncHiddenField();
+    renderPaymentMethods();
+    
+    // Scroll to the newly added method
+    const list = document.getElementById('payment-methods-list');
+    const lastCard = list.lastElementChild;
+    if (lastCard) {
+        lastCard.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        // Focus the name input
+        const nameInput = lastCard.querySelector('.method-name');
+        if (nameInput) nameInput.focus();
+    }
+}
+
+function removePaymentMethod(index) {
+    if (paymentMethods.length <= 1) {
+        alert('You must have at least one payment method.');
+        return;
+    }
+    if (!confirm('Remove "' + paymentMethods[index].name + '"?')) return;
+    
+    paymentMethods.splice(index, 1);
+    syncHiddenField();
+    renderPaymentMethods();
+}
+
+function resetPaymentMethods() {
+    if (!confirm('Reset all payment methods to default?')) return;
+    paymentMethods = JSON.parse(JSON.stringify(DEFAULT_METHODS));
+    syncHiddenField();
+    renderPaymentMethods();
+}
+
+// Initialize on page load
+document.addEventListener('DOMContentLoaded', function() {
+    loadPaymentMethods();
+    renderPaymentMethods();
+});
+</script>
 {% endblock %}
