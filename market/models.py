@@ -195,3 +195,4 @@ class SiteSettings(db.Model):
     currency_code    = db.Column(db.String(10), default='RWF')
     delivery_fee     = db.Column(db.Integer, default=0)
     about_content    = db.Column(db.Text, default='Welcome to Hope Collection. We provide quality products and services.')
+    payment_methods  = db.Column(db.Text, default='[{"id":"wallet","name":"Wallet Balance","enabled":true},{"id":"mtn","name":"MTN Mobile Money","enabled":true},{"id":"equity","name":"Equity Bank Transfer","enabled":true}]')

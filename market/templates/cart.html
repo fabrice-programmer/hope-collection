@@ -117,26 +117,77 @@
                                     {{ form.location_note(class_='form-control form-control-sm', placeholder='Enter landmark or additional directions (optional)', id='location_note') }}
                                 </div>
                                 <div class="mb-3">
-                                    <div class="form-label fw-semibold">Payment Method</div>
-                                    {% for subfield in form.payment_method %}
-                                    <div class="form-check mb-2">
-                                        {{ subfield(class_='form-check-input') }}
-                                        <label class="form-check-label">
-                                            {{ subfield.label.text }}
-                                        </label>
+                                    <div class="d-flex align-items-center justify-content-between mb-2">
+                                        <div class="form-label fw-bold mb-0">Payment Method</div>
+                                        <span class="badge bg-success-subtle text-success px-3 py-1 rounded-pill" style="font-size:0.7rem;font-weight:600;">
+                                            <i class="bi bi-shield-check me-1"></i>Secured
+                                        </span>
                                     </div>
-                                    {% endfor %}
+                                    <div class="payment-methods-grid" id="paymentMethodsContainer">
+                                        {% for subfield in form.payment_method %}
+                                        <div class="payment-option-card">
+                                            {{ subfield(class_='payment-radio-input') }}
+                                            <div class="payment-card-radio"></div>
+                                            {% if subfield.data == 'wallet' %}
+                                            <div class="payment-card-icon wallet-icon">
+                                                <i class="bi bi-wallet2"></i>
+                                            </div>
+                                            {% elif subfield.data == 'mtn' %}
+                                            <div class="payment-card-icon mtn-icon">
+                                                <i class="bi bi-phone"></i>
+                                            </div>
+                                            {% elif subfield.data == 'equity' %}
+                                            <div class="payment-card-icon equity-icon">
+                                                <i class="bi bi-bank"></i>
+                                            </div>
+                                            {% else %}
+                                            <div class="payment-card-icon wallet-icon">
+                                                <i class="bi bi-credit-card"></i>
+                                            </div>
+                                            {% endif %}
+                                            <div class="payment-card-info">
+                                                <div class="payment-name">{{ subfield.label.text }}</div>
+                                                {% if subfield.data == 'wallet' %}
+                                                <p class="payment-desc">Pay using your account wallet balance instantly</p>
+                                                {% elif subfield.data == 'mtn' %}
+                                                <p class="payment-desc">Pay with MTN Mobile Money — Dial *182#</p>
+                                                {% elif subfield.data == 'equity' %}
+                                                <p class="payment-desc">Bank transfer to Equity account</p>
+                                                {% else %}
+                                                <p class="payment-desc">Secure online payment option</p>
+                                                {% endif %}
+                                            </div>
+                                            <span class="payment-card-badge">
+                                                {% if subfield.data == 'wallet' %}
+                                                <i class="bi bi-lightning-charge-fill me-1"></i>Instant
+                                                {% elif subfield.data == 'mtn' %}
+                                                Mobile
+                                                {% elif subfield.data == 'equity' %}
+                                                Bank
+                                                {% endif %}
+                                            </span>
+                                        </div>
+                                        {% endfor %}
+                                    </div>
                                     <div class="invalid-feedback d-block" id="paymentError"></div>
+
+                                    <!-- Dynamic payment details panel -->
+                                    <div class="payment-details-panel d-none" id="paymentDetailsPanel">
+                                        <div class="detail-row">
+                                            <i class="bi bi-info-circle"></i>
+                                            <span id="paymentDetailText">
+                                                <strong>MTN Mobile Money:</strong> Pay to <strong>0789174857</strong>
+                                            </span>
+                                        </div>
+                                        <div class="detail-row">
+                                            <i class="bi bi-shield-check"></i>
+                                            <span>Your payment info is encrypted and secure.</span>
+                                        </div>
+                                    </div>
                                 </div>
 
-                                <div class="alert alert-secondary mt-3" role="alert">
-                                    <strong>MTN Mobile Money:</strong> pay to <strong>0789174857</strong>
-                                    <br>
-                                    <strong>Equity Bank:</strong> account <strong>4002100815300</strong>
-                                </div>
-
-                                <button type="button" id="proceedPaymentBtn" class="btn btn-success w-100 btn-lg">
-                                    💳 Proceed to Payment
+                                <button type="button" id="proceedPaymentBtn" class="btn btn-payment-proceed w-100">
+                                    <i class="bi bi-lock-fill"></i> Proceed to Payment
                                 </button>
                             </form>
                         </div>
@@ -193,11 +244,70 @@ document.addEventListener('DOMContentLoaded', function() {
     const paymentRadios = document.querySelectorAll('input[name="payment_method"]');
     const formErrors = document.getElementById('formErrors');
 
-    const paymentLabels = {
-        'wallet': 'Wallet Balance',
-        'mtn': 'MTN Mobile Money',
-        'equity': 'Equity Bank Transfer'
+    const paymentLabels = {{ payment_labels | tojson | safe }};
+
+    // --- Compute full payment label map from the cards ---
+    const paymentLabelMap = {};
+    paymentRadios.forEach(function(radio) {
+        const card = radio.closest('.payment-option-card');
+        if (card) {
+            const nameEl = card.querySelector('.payment-name');
+            paymentLabelMap[radio.value] = nameEl ? nameEl.textContent.trim() : radio.value;
+        } else {
+            paymentLabelMap[radio.value] = paymentLabels[radio.value] || radio.value;
+        }
+    });
+
+    // --- Premium Card-Style Payment Selection ---
+    const paymentCards = document.querySelectorAll('.payment-option-card');
+    const paymentDetailsPanel = document.getElementById('paymentDetailsPanel');
+    const paymentDetailText = document.getElementById('paymentDetailText');
+
+    const paymentDetails = {
+        wallet: {
+            text: '<strong>Wallet Balance:</strong> Your balance will be used to pay for this order.',
+            icon: 'bi-wallet2'
+        },
+        mtn: {
+            text: '<strong>MTN Mobile Money:</strong> Pay to <strong>0789174857</strong> — Dial *182# to complete payment.',
+            icon: 'bi-phone'
+        },
+        equity: {
+            text: '<strong>Equity Bank:</strong> Transfer to account <strong>4002100815300</strong> and share the proof.',
+            icon: 'bi-bank'
+        }
     };
+
+    paymentCards.forEach(function(card) {
+        card.addEventListener('click', function() {
+            const radio = card.querySelector('.payment-radio-input');
+            if (radio) {
+                radio.checked = true;
+                // Trigger change event manually
+                const evt = new Event('change', { bubbles: true });
+                radio.dispatchEvent(evt);
+            }
+        });
+
+        // Also handle when radio is changed by keyboard/other means
+        const radio = card.querySelector('.payment-radio-input');
+        if (radio) {
+            radio.addEventListener('change', function() {
+                paymentCards.forEach(function(c) { c.classList.remove('selected'); });
+                if (this.checked) {
+                    card.classList.add('selected');
+                    // Update details panel
+                    const details = paymentDetails[this.value];
+                    if (details) {
+                        paymentDetailText.innerHTML = details.text;
+                        paymentDetailsPanel.classList.remove('d-none');
+                    } else {
+                        paymentDetailsPanel.classList.add('d-none');
+                    }
+                }
+            });
+        }
+    });
 
     // Clear validation styling on input
     document.querySelectorAll('#checkoutForm input, #checkoutForm textarea').forEach(function(el) {
@@ -261,13 +371,9 @@ document.addEventListener('DOMContentLoaded', function() {
             return;
         }
 
-        let selectedLabel = '';
-        paymentRadios.forEach(function(radio) {
-            if (radio.checked) {
-                const labelEl = radio.closest('.form-check')?.querySelector('.form-check-label');
-                selectedLabel = labelEl ? labelEl.textContent.trim() : (paymentLabels[radio.value] || radio.value);
-            }
-        });
+        let selectedLabel = paymentLabelMap[Object.keys(paymentLabelMap).find(function(k) {
+            return document.querySelector('input[name="payment_method"][value="' + k + '"]')?.checked;
+        })] || '—';
 
         modalPaymentMethod.textContent = selectedLabel;
         paymentModal.show();

@@ -195,7 +195,51 @@ def delete_item(item_id):
 @app.route('/')
 def home_page():
     featured_items = Item.query.order_by(Item.id.desc()).limit(8).all()
-    return render_template('home.html', featured_items=featured_items)
+
+    # Load payment methods for the home page display
+    settings = db.session.execute(select(SiteSettings)).scalar_one_or_none()
+    payment_methods_list = []
+    if settings and settings.payment_methods:
+        try:
+            methods = json.loads(settings.payment_methods)
+            for m in methods:
+                if m.get('enabled', True):
+                    pid = m['id']
+                    pname = m['name']
+                    # Map icons and descriptions
+                    icon_map = {
+                        'wallet': 'bi-wallet2',
+                        'mtn': 'bi-phone',
+                        'equity': 'bi-bank'
+                    }
+                    desc_map = {
+                        'wallet': 'Instant payment from your wallet balance',
+                        'mtn': 'Dial *182# to pay via MTN Mobile Money',
+                        'equity': 'Transfer to Equity Bank account'
+                    }
+                    color_map = {
+                        'wallet': 'linear-gradient(135deg, #198754, #20c997)',
+                        'mtn': 'linear-gradient(135deg, #e6b800, #ffcc00)',
+                        'equity': 'linear-gradient(135deg, #1a5276, #2e86c1)'
+                    }
+                    payment_methods_list.append({
+                        'id': pid,
+                        'name': pname,
+                        'icon': icon_map.get(pid, 'bi-credit-card'),
+                        'description': desc_map.get(pid, 'Secure payment option'),
+                        'gradient': color_map.get(pid, 'linear-gradient(135deg, #6c757d, #adb5bd)')
+                    })
+        except (json.JSONDecodeError, KeyError):
+            pass
+
+    if not payment_methods_list:
+        payment_methods_list = [
+            {'id': 'wallet', 'name': 'Wallet Balance', 'icon': 'bi-wallet2', 'description': 'Instant payment from your wallet balance', 'gradient': 'linear-gradient(135deg, #198754, #20c997)'},
+            {'id': 'mtn', 'name': 'MTN Mobile Money', 'icon': 'bi-phone', 'description': 'Dial *182# to pay via MTN Mobile Money', 'gradient': 'linear-gradient(135deg, #e6b800, #ffcc00)'},
+            {'id': 'equity', 'name': 'Equity Bank Transfer', 'icon': 'bi-bank', 'description': 'Transfer to Equity Bank account', 'gradient': 'linear-gradient(135deg, #1a5276, #2e86c1)'}
+        ]
+
+    return render_template('home.html', featured_items=featured_items, payment_methods=payment_methods_list)
 
 
 @app.route('/market')
@@ -343,8 +387,38 @@ def add_to_cart(item_id):
 def view_cart():
     cart = session.get('cart', [])
     total_price = sum(i['price'] * i['quantity'] for i in cart)
-    form = CheckoutForm()
-    return render_template('cart.html', cart=cart, total_price=total_price, form=form)
+
+    # Load payment methods from settings
+    settings = db.session.execute(select(SiteSettings)).scalar_one_or_none()
+    payment_choices = []
+    payment_labels_json = {}
+    if settings and settings.payment_methods:
+        try:
+            methods = json.loads(settings.payment_methods)
+            for m in methods:
+                if m.get('enabled', True):
+                    pid = m['id']
+                    pname = m['name']
+                    payment_choices.append((pid, pname))
+                    payment_labels_json[pid] = pname
+        except (json.JSONDecodeError, KeyError):
+            pass
+
+    if not payment_choices:
+        # Fallback defaults
+        payment_choices = [
+            ('wallet', 'Wallet Balance'),
+            ('mtn', 'MTN Mobile Money'),
+            ('equity', 'Equity Bank Transfer')
+        ]
+        payment_labels_json = {
+            'wallet': 'Wallet Balance',
+            'mtn': 'MTN Mobile Money',
+            'equity': 'Equity Bank Transfer'
+        }
+
+    form = CheckoutForm(payment_choices=payment_choices)
+    return render_template('cart.html', cart=cart, total_price=total_price, form=form, payment_labels=payment_labels_json)
 
 
 @app.route('/remove-from-cart/<int:item_id>')
@@ -783,6 +857,7 @@ def admin_settings():
         settings.currency_code = form.currency_code.data
         settings.delivery_fee = form.delivery_fee.data
         settings.about_content = form.about_content.data
+        settings.payment_methods = form.payment_methods.data
         db.session.commit()
         flash('Site settings have been updated!', category='success')
         return redirect(url_for('admin_dashboard'))

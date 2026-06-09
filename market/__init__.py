@@ -177,6 +177,7 @@ def inject_site_settings():
             facebook_url = ''
             instagram_url = ''
             about_content = 'Welcome to Hope Collection.'
+            payment_methods = '[{"id":"wallet","name":"Wallet Balance","enabled":true},{"id":"mtn","name":"MTN Mobile Money","enabled":true},{"id":"equity","name":"Equity Bank Transfer","enabled":true}]'
 
         settings = DefaultSettings()
 

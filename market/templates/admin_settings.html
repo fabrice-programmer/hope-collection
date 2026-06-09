@@ -134,6 +134,27 @@
                             {% endfor %}
                         </div>
 
+                        <!-- Section: Payment Methods -->
+                        <h5 class="text-primary border-bottom pb-2 mb-3"><i class="bi bi-credit-card me-2"></i>Payment Methods</h5>
+                        <div class="mb-4">
+                            <div class="alert alert-info py-2 small">
+                                <i class="bi bi-info-circle me-2"></i> Configure which payment methods are available for checkout. Edit the JSON array below. Each method needs an <code>id</code>, <code>name</code>, and <code>enabled</code> field. Set <code>"enabled": false</code> to disable a method.
+                            </div>
+                            {{ form.payment_methods.label(class="form-label fw-bold") }}
+                            {{ form.payment_methods(class="form-control font-monospace" ~ (" is-invalid" if form.payment_methods.errors else ""), rows="6") }}
+                            {% for error in form.payment_methods.errors %}
+                                <div class="invalid-feedback d-block">{{ error }}</div>
+                            {% endfor %}
+                            <div class="mt-2">
+                                <button type="button" class="btn btn-sm btn-outline-secondary" onclick="document.getElementById('payment_methods').value = '[{\"id\":\"wallet\",\"name\":\"Wallet Balance\",\"enabled\":true},{\"id\":\"mtn\",\"name\":\"MTN Mobile Money\",\"enabled\":true},{\"id\":\"equity\",\"name\":\"Equity Bank Transfer\",\"enabled\":true}]';">
+                                    <i class="bi bi-arrow-counterclockwise me-1"></i>Reset Default
+                                </button>
+                                <button type="button" class="btn btn-sm btn-outline-primary" onclick="try { const v = JSON.parse(document.getElementById('payment_methods').value); document.getElementById('payment_methods').value = JSON.stringify(v, null, 2); } catch(e) { alert('Invalid JSON: ' + e.message); }">
+                                    <i class="bi bi-text-indent-left me-1"></i>Format JSON
+                                </button>
+                            </div>
+                        </div>
+
                         <div class="alert alert-info py-2 small mt-2">
                             <i class="bi bi-info-circle me-2"></i> Note: These changes will take effect immediately across the home page, market, and contact sections.
                         </div>

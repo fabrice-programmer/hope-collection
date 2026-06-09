@@ -137,15 +137,17 @@ class CheckoutForm(FlaskForm):
 
     payment_method = RadioField(
         label='Select Payment Method',
-        choices=[
-            ('wallet', 'Wallet balance'),
-            ('mtn', 'MTN Mobile Money'),
-            ('equity', 'Equity Bank Transfer')
-        ],
+        choices=[],
         validators=[DataRequired()]
     )
 
     submit = SubmitField(label='Complete Checkout')
+
+    def __init__(self, *args, **kwargs):
+        payment_choices = kwargs.pop('payment_choices', [])
+        super().__init__(*args, **kwargs)
+        if payment_choices:
+            self.payment_method.choices = payment_choices
 
 class ItemForm(FlaskForm):
     name = StringField(
@@ -226,5 +228,10 @@ class SettingsForm(FlaskForm):
     about_content = TextAreaField(
         label='About Us Content:',
         validators=[DataRequired()]
+    )
+    payment_methods = TextAreaField(
+        label='Payment Methods (JSON):',
+        validators=[DataRequired()],
+        description='Configure payment methods as a JSON array. Each method needs "id", "name", and "enabled". '
     )
     submit = SubmitField(label='Update Settings')
