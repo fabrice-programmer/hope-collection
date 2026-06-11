@@ -11,7 +11,7 @@ def load_user(user_id):
     return db.session.get(User, int(user_id))  # ✅ FIXED: replaced deprecated User.query.get()
 
 
-# -------------------------
+# -----------------------
 # USER
 # -------------------------
 class User(db.Model, UserMixin):  # ✅ FIXED: only ONE User class (merged both into this one)
