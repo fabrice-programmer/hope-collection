@@ -29,16 +29,27 @@ load_dotenv(env_path)
 # -------------------------
 # DATABASE CONFIG
 # -------------------------
-database_path = os.path.join(
-    basedir,
-    '..',
-    'instance',
-    'database.db'
-)
 
-os.makedirs(os.path.dirname(database_path), exist_ok=True)
+# Support PostgreSQL via DATABASE_URL environment variable (Render, Heroku, etc.)
+# with SQLite fallback for local development
+database_url = os.environ.get('DATABASE_URL')
 
-database_uri = f"sqlite:///{os.path.normpath(database_path).replace(os.path.sep, '/')}"
+if database_url:
+    # Fix: SQLAlchemy 2.0+ requires 'postgresql://' not 'postgres://'
+    # Render often provides 'postgres://' which causes error e3q8
+    if database_url.startswith('postgres://'):
+        database_url = database_url.replace('postgres://', 'postgresql://', 1)
+    database_uri = database_url
+else:
+    # Local development SQLite fallback
+    database_path = os.path.join(
+        basedir,
+        '..',
+        'instance',
+        'database.db'
+    )
+    os.makedirs(os.path.dirname(database_path), exist_ok=True)
+    database_uri = f"sqlite:///{os.path.normpath(database_path).replace(os.path.sep, '/')}"
 
 app.config['SQLALCHEMY_DATABASE_URI'] = database_uri
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
@@ -105,7 +116,7 @@ app.config['SHOW_RESET_LINK_WHEN_EMAIL_FAIL'] = os.environ.get(
 # -------------------------
 print(f" * Loading .env from: {env_path}")
 print(f" * .env Exists: {os.path.exists(env_path)}")
-print(f" * Database Path: {database_path}")
+print(f" * Database URI: {database_uri}")
 print(f" * Email User: {app.config['MAIL_USERNAME']}")
 print(f" * Password Loaded: {bool(app.config['MAIL_PASSWORD'])}")
 

@@ -25,11 +25,14 @@ def get_engine():
 
 
 def get_engine_url():
+    engine = get_engine()
     try:
-        return get_engine().url.render_as_string(hide_password=False).replace(
+        # SQLAlchemy 2.0+ uses URL rendering
+        return engine.url.render_as_string(hide_password=False).replace(
             '%', '%%')
-    except AttributeError:
-        return str(get_engine().url).replace('%', '%%')
+    except (AttributeError, TypeError):
+        # Fallback for older SQLAlchemy versions or direct URL access
+        return str(engine.url).replace('%', '%%')
 
 
 # add your model's MetaData object here

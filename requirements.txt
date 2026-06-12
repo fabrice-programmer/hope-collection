@@ -10,3 +10,4 @@ WTForms
 Flask-WTF
 itsdangerous
 gunicorn
+psycopg2-binary
