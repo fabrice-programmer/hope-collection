@@ -15,7 +15,7 @@ if database_url:
 
 # -----------------------------
 # Optional safety config
-# -----------------------------
+
 app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 
 
