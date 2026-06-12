@@ -1,4 +1,5 @@
-from market import app, db
+from market import db, app
+from market.models import *
 
 if __name__ == "__main__":
     with app.app_context():
