@@ -13,7 +13,7 @@ if database_url:
 
     app.config["SQLALCHEMY_DATABASE_URI"] = database_url
 
-# -----------------------------
+
 # Optional safety config
 
 app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
