@@ -9,3 +9,4 @@ python-dotenv
 WTForms
 Flask-WTF
 itsdangerous
+gunicorn
